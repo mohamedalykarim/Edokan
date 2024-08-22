@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "531300347531",
+    "project_id": "e-dokan-e2463",
+    "storage_bucket": "e-dokan-e2463.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:531300347531:android:9cdd778f3d2b524eda2e8e",
+        "android_client_info": {
+          "package_name": "com.mohalim.edokan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAISsiB3JqAxPI2WRVL55qvbe8GmLDwk2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
