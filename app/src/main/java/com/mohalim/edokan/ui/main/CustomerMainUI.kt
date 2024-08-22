@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 @Composable
-fun CustomerMainUI(viewModel: LoginViewModel) {
+fun CustomerMainUI(viewModel: MainViewModel) {
     val username by viewModel.username.collectAsState(initial = "")
     val phoneNumber by viewModel.phoneNumber.collectAsState(initial = "")
     val imageUrl by viewModel.imageUrl.collectAsState(initial = "")

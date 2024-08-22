@@ -1,8 +1,10 @@
 package com.mohalim.edokan.ui.main
 
+import android.content.Context
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -10,15 +12,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.mohalim.edokan.core.datasource.UserPreferencesRepository
-import com.mohalim.edokan.core.model.City
+import androidx.lifecycle.lifecycleScope
+import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
+import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.utils.AuthUtils
+import com.mohalim.edokan.core.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    val viewModel by viewModels<LoginViewModel>()
+    val viewModel by viewModels<MainViewModel>()
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
 
@@ -49,7 +54,7 @@ class MainActivity : AppCompatActivity() {
                     if (!AuthUtils.checkUserAuthentication()){
                         LoginScreen(viewModel = viewModel)
                     }else{
-                        val role by viewModel.role.collectAsState(initial = "CUSTOMER")
+                        val role by viewModel.role.collectAsState(initial = "")
                         if (role != null) NavigateBasedInRole(viewModel, role!!)
                     }
 
@@ -61,8 +66,33 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        observeMarketplacesListStatus(this)
+    }
+
+    private fun observeMarketplacesListStatus(context: Context) {
+        lifecycleScope.launch {
+            viewModel.marketplacesListStatus.collect{
+                when(it){
+                    is Resource.Loading->{
+                    }
+
+                    is Resource.Success<*> ->{
+                        viewModel.setMarketplaces(it.data as List<MarketPlace>)
+                    }
+
+                    is Resource.Error<*> ->{
+                        Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+        }
+    }
+
     @Composable
-    private fun NavigateBasedInRole(viewModel: LoginViewModel, role : String) {
+    private fun NavigateBasedInRole(viewModel: MainViewModel, role : String) {
         Log.d("TAG", "NavigateBasedInRole: "+role)
         when (role){
             "CUSTOMER"->{
@@ -70,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             }
             "SELLER"->{
                 Text(text = "Seller")
-                SellerMainUI(viewModel = viewModel)
+                SellerMainUI(this@MainActivity, viewModel = viewModel)
             }
             "DELIVERY"->{
             }

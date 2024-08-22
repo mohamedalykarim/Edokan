@@ -36,7 +36,7 @@ import com.mohalim.edokan.R
 
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel){
+fun LoginScreen(viewModel: MainViewModel){
     val uiState by viewModel.uiState.collectAsState()
 
     var phoneNumber by remember { mutableStateOf("") }

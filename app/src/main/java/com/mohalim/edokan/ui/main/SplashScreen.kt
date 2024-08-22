@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.mohalim.edokan.R
 
 @Composable
-fun SplashScreen(context: Context, viewModel: LoginViewModel){
+fun SplashScreen(context: Context, viewModel: MainViewModel){
     Box(
         modifier = Modifier
             .fillMaxSize()

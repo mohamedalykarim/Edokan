@@ -1,7 +1,8 @@
-package com.mohalim.edokan.core.datasource
+package com.mohalim.edokan.core.datasource.preferences
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -19,16 +20,20 @@ class UserPreferencesRepository(private val context: Context) {
         val PHONE_NUMBER_KEY = stringPreferencesKey("phone_number")
         val IMAGE_URL_KEY = stringPreferencesKey("image_url")
         val ROLE_KEY = stringPreferencesKey("role")
+        val CITY_ID = intPreferencesKey("city_id")
+        val CITY = stringPreferencesKey("city")
     }
 
     // Save user details
-    suspend fun saveUserDetails(uid: String, username: String, phoneNumber: String, imageUrl: String, role: String) {
+    suspend fun saveUserDetails(uid: String, username: String, phoneNumber: String, imageUrl: String, role: String, cityId : Int, city : String) {
         context.dataStore.edit { preferences ->
             preferences[USER_ID] = uid
             preferences[USERNAME_KEY] = username
             preferences[PHONE_NUMBER_KEY] = phoneNumber
             preferences[IMAGE_URL_KEY] = imageUrl
             preferences[ROLE_KEY] = role
+            preferences[CITY_ID] = cityId
+            preferences[CITY] = city
         }
     }
 
@@ -58,11 +63,29 @@ class UserPreferencesRepository(private val context: Context) {
             preferences[ROLE_KEY]
         }
 
+    val cityIdFlow: Flow<Int?> = context.dataStore.data
+        .map { preferences ->
+            preferences[CITY_ID]
+        }
+
+    val cityFlow: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[CITY]
+        }
+
     suspend fun getRole(): String? {
         val role: String? = context.dataStore.data
             .map { preferences -> preferences[ROLE_KEY] }
             .single()
 
         return role
+    }
+
+    suspend fun getCity(): String? {
+        val city: String? = context.dataStore.data
+            .map { preferences -> preferences[CITY] }
+            .single()
+
+        return city
     }
 }

@@ -8,27 +8,44 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mohalim.edokan.core.datasource.UserPreferencesRepository
+import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
+import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
+import com.mohalim.edokan.core.datasource.repository.SellerRepository
+import com.mohalim.edokan.core.model.MarketPlace
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPreferencesRepository) : ViewModel() {
+class MainViewModel @Inject constructor(
+    val userPreferencesRepository: UserPreferencesRepository,
+    val userSelectionPreferencesRepository: UserSelectionPreferencesRepository,
+    val sellerRepository: SellerRepository
+
+) : ViewModel() {
+
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private val _marketplacesListStatus = MutableStateFlow<Any>(0)
+    val marketplacesListStatus : MutableStateFlow<Any> = _marketplacesListStatus
+
 
     private val _uiState = MutableStateFlow<VerificationState>(VerificationState.Initial)
     val uiState: StateFlow<VerificationState> = _uiState
 
     private val _homePageState = MutableStateFlow("LOADING")
     val homePageState: StateFlow<String> = _homePageState
+
+    private val _marketplaces = MutableStateFlow(emptyList<MarketPlace>())
+    val marketplaces: StateFlow<List<MarketPlace>> = _marketplaces
 
     private lateinit var verificationId: String
     private lateinit var resendingToken: PhoneAuthProvider.ForceResendingToken
@@ -38,9 +55,23 @@ class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPref
     val phoneNumber: Flow<String?> = userPreferencesRepository.phoneNumberFlow
     val imageUrl: Flow<String?> = userPreferencesRepository.imageUrlFlow
     val role: Flow<String?> = userPreferencesRepository.roleFlow
+    val cityId: Flow<Int?> = userPreferencesRepository.cityIdFlow
+    val city: Flow<String?> = userPreferencesRepository.cityFlow
+
+
+    init {
+        viewModelScope.launch {
+            fetchApprovedMarketPlaces(cityId.first() ?: 1, phoneNumber.first() ?: "")
+        }
+    }
+
 
     fun setHomePageState(state: String) {
         _homePageState.value = state
+    }
+
+    fun setMarketplaces(marketplaces: List<MarketPlace>) {
+        _marketplaces.value = marketplaces
     }
 
     fun sendVerificationCode(phoneNumber: String) {
@@ -71,7 +102,7 @@ class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPref
         }
 
         override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
-            this@LoginViewModel.verificationId = verificationId
+            this@MainViewModel.verificationId = verificationId
             resendingToken = token
             _uiState.value = VerificationState.CodeSent(verificationId)
         }
@@ -108,7 +139,10 @@ class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPref
                             document.getString("username").toString(),
                             document.getString("phoneNumber").toString(),
                             document.getString("imageUrl").toString(),
-                            document.getString("role").toString())
+                            document.getString("role").toString(),
+                            document.getLong("city_id")?.toInt() ?: 1,
+                            document.getString("city").toString(),
+                        )
                     }
                 }
 
@@ -132,7 +166,10 @@ class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPref
                                     user.displayName ?: "",
                                     user.phoneNumber ?: "",
                                     user.photoUrl.toString(),
-                                    "CUSTOMER")
+                                    "CUSTOMER",
+                                    1,
+                                    "Higaza"
+                                )
                             }
                         }
                     }
@@ -145,6 +182,23 @@ class LoginViewModel @Inject constructor(val userPreferencesRepository: UserPref
             _uiState.value = VerificationState.VerificationFailed(it)
         }
     }
+
+
+    private fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
+        viewModelScope.launch {
+            sellerRepository.getApprovedMarketPlaces(cityId, marketplaceOwnerId).collect{
+                _marketplacesListStatus.value = it
+            }
+        }
+    }
+
+    fun setSelectedMarketplace(marketplace: MarketPlace) {
+        viewModelScope.launch {
+            userSelectionPreferencesRepository.setSelectedMarketplace(marketplace.marketplaceId)
+        }
+    }
+
+
 }
 
 sealed class VerificationState {
