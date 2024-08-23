@@ -81,6 +81,14 @@ class UserPreferencesRepository(private val context: Context) {
         return role
     }
 
+    suspend fun getCityId(): Int? {
+        val cityId: Int? = context.dataStore.data
+            .map { preferences -> preferences[CITY_ID] }
+            .single()
+
+        return cityId
+    }
+
     suspend fun getCity(): String? {
         val city: String? = context.dataStore.data
             .map { preferences -> preferences[CITY] }

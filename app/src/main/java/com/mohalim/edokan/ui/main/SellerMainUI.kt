@@ -85,6 +85,12 @@ fun SellerMainUI(context: Context, viewModel: MainViewModel) {
 @Composable
 fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: String?, marketplaces: List<MarketPlace> = emptyList()) {
     var selectedMarketplace by remember { mutableStateOf<MarketPlace?>(null) }
+    val selectedMarketplaceId by viewModel.selectedMarketPlaceId.collectAsState(initial = "")
+    val selectedMarketplaceName by viewModel.selectedMarketPlaceName.collectAsState(initial = "")
+
+    val cityId by viewModel.cityId.collectAsState(initial = 0)
+    val phoneNumber by viewModel.phoneNumber.collectAsState(initial = "")
+    
 
     Scaffold(
         floatingActionButton = {
@@ -100,21 +106,64 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
 
     )
     { innerPadding ->
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+
             Text(text = "Welcome back! "+ username, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
 
-            MarketplaceSelectionList(
-                marketplaces = marketplaces,
-                selectedMarketplace = selectedMarketplace,
-                onMarketplaceSelected = { marketplace ->
-                    viewModel.setSelectedMarketplace(marketplace)
+            if (selectedMarketplaceId.isNullOrEmpty()){
+                /**
+                 * No selected Marketplace so show lazy column
+                 */
+
+                MarketplaceSelectionList(
+                    marketplaces = marketplaces,
+                    selectedMarketplace = selectedMarketplace,
+                    onMarketplaceSelected = { marketplace ->
+                        viewModel.setSelectedMarketplace(marketplace)
+                    }
+                )
+            }else{
+                /**
+                 * there is selected marketplace
+                 */
+
+                Text(text = "Selected Marketplace", style = MaterialTheme.typography.h6)
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clickable {
+                            viewModel.setSelectedMarketplace(MarketPlace())
+                            viewModel.fetchApprovedMarketPlaces(cityId ?: 0, phoneNumber ?: "")
+                        },
+                    backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.2f),
+                    elevation = 4.dp
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = selectedMarketplaceName ?: "",
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.primary
+                        )
+                    }
                 }
-            )
+
+            }
+
+
 
 
 
@@ -142,7 +191,9 @@ fun MarketplaceSelectionList(
         Text(text = "Choose a Marketplace", style = MaterialTheme.typography.h6)
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+        LazyColumn(modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)) {
             items(marketplaces) { marketplace ->
                 MarketplaceItem(
                     marketplace = marketplace,

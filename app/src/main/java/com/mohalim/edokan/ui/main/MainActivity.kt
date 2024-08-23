@@ -14,11 +14,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
+import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.utils.AuthUtils
 import com.mohalim.edokan.core.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -26,10 +31,10 @@ class MainActivity : AppCompatActivity() {
     val viewModel by viewModels<MainViewModel>()
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
+    @Inject lateinit var userSelectionPreferencesRepository: UserSelectionPreferencesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             val homePageState by viewModel.homePageState.collectAsState()
             val uiState by viewModel.uiState.collectAsState()
@@ -63,12 +68,22 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-
     }
 
     override fun onResume() {
         super.onResume()
         observeMarketplacesListStatus(this)
+
+        lifecycleScope.launch {
+            val cityId = viewModel.cityId.first()
+            val marketplaceOwnerId =  viewModel.phoneNumber.first()
+
+
+            if (viewModel.selectedMarketPlaceId.first().isNullOrEmpty()) {
+                viewModel.fetchApprovedMarketPlaces(cityId ?: 0, marketplaceOwnerId ?: "")
+            }
+        }
+
     }
 
     private fun observeMarketplacesListStatus(context: Context) {

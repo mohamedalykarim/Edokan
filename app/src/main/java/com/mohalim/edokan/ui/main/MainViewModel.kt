@@ -1,5 +1,6 @@
 package com.mohalim.edokan.ui.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseException
@@ -58,13 +59,8 @@ class MainViewModel @Inject constructor(
     val cityId: Flow<Int?> = userPreferencesRepository.cityIdFlow
     val city: Flow<String?> = userPreferencesRepository.cityFlow
 
-
-    init {
-        viewModelScope.launch {
-            fetchApprovedMarketPlaces(cityId.first() ?: 1, phoneNumber.first() ?: "")
-        }
-    }
-
+    val selectedMarketPlaceId: Flow<String?> = userSelectionPreferencesRepository.selectedMarketplaceIdFlow
+    val selectedMarketPlaceName: Flow<String?> = userSelectionPreferencesRepository.selectedMarketplaceNameFlow
 
     fun setHomePageState(state: String) {
         _homePageState.value = state
@@ -184,17 +180,19 @@ class MainViewModel @Inject constructor(
     }
 
 
-    private fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
-        viewModelScope.launch {
+    fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
+        viewModelScope.launch{
             sellerRepository.getApprovedMarketPlaces(cityId, marketplaceOwnerId).collect{
                 _marketplacesListStatus.value = it
+                Log.d("TAG", "fetchApprovedMarketPlaces: "+cityId+" "+marketplaceOwnerId)
             }
         }
     }
 
     fun setSelectedMarketplace(marketplace: MarketPlace) {
         viewModelScope.launch {
-            userSelectionPreferencesRepository.setSelectedMarketplace(marketplace.marketplaceId)
+            userSelectionPreferencesRepository.setSelectedMarketplaceId(marketplace.marketplaceId)
+            userSelectionPreferencesRepository.setSelectedMarketplaceName(marketplace.marketplaceName)
         }
     }
 
