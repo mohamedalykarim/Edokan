@@ -3,6 +3,8 @@ package com.mohalim.edokan.ui.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -13,6 +15,7 @@ import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.model.MarketPlace
+import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.AuthUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +55,24 @@ class MainViewModel @Inject constructor(
     private val _marketplaces = MutableStateFlow(emptyList<MarketPlace>())
     val marketplaces: StateFlow<List<MarketPlace>> = _marketplaces
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    val products: StateFlow<List<Product>> = _products
+
+    fun searchProducts(query: String) {
+        _searchQuery.value = query
+        fetchProducts(query)
+    }
+
+    private fun fetchProducts(query: String) {
+        viewModelScope.launch {
+            _products.value = sellerRepository.getProducts(query, 20L)
+        }
+    }
+
+
     private lateinit var verificationId: String
     private lateinit var resendingToken: PhoneAuthProvider.ForceResendingToken
 
@@ -72,6 +93,10 @@ class MainViewModel @Inject constructor(
 
     fun setMarketplaces(marketplaces: List<MarketPlace>) {
         _marketplaces.value = marketplaces
+    }
+
+    fun setProducts(products: List<Product>) {
+        _products.value = products
     }
 
     fun setShowLoading(value: Boolean) {
@@ -167,7 +192,7 @@ class MainViewModel @Inject constructor(
                 val cityName = "Higaza"
 
                 val newUser = hashMapOf(
-                    "uid" to user.phoneNumber.toString(),
+                    "uid" to user.uid,
                     "email" to user.email,
                     "phoneNumber" to user.phoneNumber,
                     "role" to "CUSTOMER",
@@ -218,10 +243,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
+
     fun setSelectedMarketplace(marketplace: MarketPlace) {
         viewModelScope.launch {
             userSelectionPreferencesRepository.setSelectedMarketplaceId(marketplace.marketplaceId)
             userSelectionPreferencesRepository.setSelectedMarketplaceName(marketplace.marketplaceName)
+            userSelectionPreferencesRepository.setSelectedMarketplaceLat(marketplace.lat)
+            userSelectionPreferencesRepository.setSelectedMarketplaceLng(marketplace.lng)
         }
     }
 

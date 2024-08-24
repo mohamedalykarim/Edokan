@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,11 +20,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddBusiness
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Logout
@@ -41,6 +46,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,9 +56,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,13 +70,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
 import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.R
 import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.model.MarketPlace
+import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.AuthUtils
 import com.mohalim.edokan.core.utils.SealedSellerScreen
 import com.mohalim.edokan.ui.seller.SellerAddMarketplaceActivity
+import com.mohalim.edokan.ui.seller.SellerAddProductActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -96,7 +110,7 @@ fun SellerMainUI(context: Context, viewModel: MainViewModel) {
                 SellerHomeScreen(context = context, viewModel, username, marketplaces)
             }
             composable(SealedSellerScreen.Products.route) {
-                SellerProductsScreen()
+                SellerProductsScreen(context, viewModel)
 
             }
             composable(SealedSellerScreen.Orders.route) {
@@ -129,7 +143,7 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                     context.startActivity(intent)
                 }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Marketplace")
+                Icon(Icons.Default.AddBusiness, contentDescription = "Add Marketplace")
             }
         }
 
@@ -288,9 +302,126 @@ fun MarketplaceItem(
 
 
 @Composable
-fun SellerProductsScreen() {
-    Text(text = "Product Screen")
+fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val intent = Intent(context, SellerAddProductActivity::class.java)
+                    context.startActivity(intent)
+                }
+            ) {
+                Icon(Icons.Default.AddShoppingCart, contentDescription = "Add Marketplace")
+            }
+        }
+
+    )
+    { innerPadding ->
+        var searchQuery by remember { mutableStateOf("") }
+        val products by viewModel.products.collectAsState()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            TextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    viewModel.searchProducts(it)
+                },
+                label = { Text("Search Products") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(products) { product ->
+                    ProductItem(product)
+                }
+            }
+        }
+
+
+
+
+    }
 }
+
+@Composable
+fun ProductItem(product: Product) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 4.dp,
+        shape = RoundedCornerShape(8.dp),
+        backgroundColor = Color.White
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                    .data(product.productImage)
+                    .size(Size.ORIGINAL)
+                    .build()
+                ),
+                contentDescription = product.productName,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Text(
+                    text = product.productName,
+                    style = MaterialTheme.typography.subtitle1,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = product.productDescription,
+                    style = MaterialTheme.typography.body2,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "$${product.productPrice}",
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.Green,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Qty: ${product.productQuantity}",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun SellerOrdersScreen() {

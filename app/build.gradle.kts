@@ -70,6 +70,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation (libs.androidx.material.icons.extended)
 
+    implementation (libs.coil.compose) // or the latest version
+    implementation (libs.androidx.paging.runtime)
+    implementation (libs.androidx.paging.compose)
+
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
@@ -79,6 +83,11 @@ dependencies {
     kapt(libs.hilt.android.compiler)
 
     implementation (libs.androidx.datastore.preferences)
+
+
+    implementation (libs.firebase.storage.ktx)
+    implementation (libs.accompanist.permissions)
+    implementation (libs.androidx.activity.compose.v150)
 
 }
 
