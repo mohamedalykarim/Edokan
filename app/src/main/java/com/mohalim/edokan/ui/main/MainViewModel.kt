@@ -142,23 +142,30 @@ class MainViewModel @Inject constructor(
             if (document.exists()) {
                 viewModelScope.launch {
                     withContext(Dispatchers.IO){
+                        val cityId = document.getLong("cityId")
+                        val phoneNumber = document.getString("phoneNumber").toString()
+
                         userPreferencesRepository.saveUserDetails(
                             document.getString("uid").toString(),
                             document.getString("username").toString(),
-                            document.getString("phoneNumber").toString(),
+                            phoneNumber,
                             document.getString("imageUrl").toString(),
                             document.getString("role").toString(),
-                            document.getLong("city_id")?.toInt() ?: 1,
+                            cityId!!.toInt(),
                             document.getString("city").toString(),
                         )
 
-                        fetchApprovedMarketPlaces(document.getLong("city_id")?.toInt() ?: 0, document.getString("phoneNumber").toString())
+
+                        fetchApprovedMarketPlaces(cityId.toInt(), phoneNumber)
 
 
                     }
                 }
 
             } else {
+                val cityId = 1;
+                val cityName = "Higaza"
+
                 val newUser = hashMapOf(
                     "uid" to user.phoneNumber.toString(),
                     "email" to user.email,
@@ -166,11 +173,12 @@ class MainViewModel @Inject constructor(
                     "role" to "CUSTOMER",
                     "username" to user.displayName,
                     "imageUrl" to user.photoUrl.toString(),
-                    "points" to 0
+                    "points" to 0,
+                    "cityId" to cityId,
+                    "cityName" to cityName
                 )
                 db.collection("Users").document(user.phoneNumber.toString()).set(newUser)
                     .addOnSuccessListener {
-                        val cityId = 1;
 
                         viewModelScope.launch {
                             withContext(Dispatchers.IO){
