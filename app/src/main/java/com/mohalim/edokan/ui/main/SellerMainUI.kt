@@ -3,27 +3,42 @@ package com.mohalim.edokan.ui.main
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Shop
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,10 +46,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,9 +61,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.mohalim.edokan.R
+import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.model.MarketPlace
+import com.mohalim.edokan.core.utils.AuthUtils
 import com.mohalim.edokan.core.utils.SealedSellerScreen
 import com.mohalim.edokan.ui.seller.SellerAddMarketplaceActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -54,9 +81,10 @@ fun SellerMainUI(context: Context, viewModel: MainViewModel) {
     val navController = rememberNavController()
     val username by viewModel.username.collectAsState(initial = "")
     val marketplaces by viewModel.marketplaces.collectAsState()
+    val role by viewModel.role.collectAsState(initial = "")
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController, viewModel) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -69,13 +97,14 @@ fun SellerMainUI(context: Context, viewModel: MainViewModel) {
             }
             composable(SealedSellerScreen.Products.route) {
                 SellerProductsScreen()
+
             }
             composable(SealedSellerScreen.Orders.route) {
                 SellerOrdersScreen()
             }
 
             composable(SealedSellerScreen.User.route) {
-                SellerUserScreen()
+                SellerUserScreen(viewModel)
             }
         }
     }
@@ -114,9 +143,22 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
 
-            Text(text = "Welcome back! "+ username, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+            Text(
+                text = "Welcome back! " + username,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
 
-            if (selectedMarketplaceId.isNullOrEmpty()){
+
+            ElevatedCard(
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 6.dp
+                ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+
+            if (selectedMarketplaceId.isNullOrEmpty()) {
                 /**
                  * No selected Marketplace so show lazy column
                  */
@@ -128,7 +170,7 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                         viewModel.setSelectedMarketplace(marketplace)
                     }
                 )
-            }else{
+            } else {
                 /**
                  * there is selected marketplace
                  */
@@ -138,7 +180,7 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
                         .clickable {
                             viewModel.setSelectedMarketplace(MarketPlace())
                             viewModel.fetchApprovedMarketPlaces(cityId ?: 0, phoneNumber ?: "")
@@ -153,6 +195,13 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Store,
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+
                         Text(
                             text = selectedMarketplaceName ?: "",
                             style = MaterialTheme.typography.body1,
@@ -163,11 +212,8 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
 
             }
 
+            }}
 
-
-
-
-        }
 
 
 
@@ -225,6 +271,12 @@ fun MarketplaceItem(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                imageVector = Icons.Default.Store,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
+            )
+            Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = marketplace.marketplaceName,
                 style = MaterialTheme.typography.body1,
@@ -246,12 +298,42 @@ fun SellerOrdersScreen() {
 }
 
 @Composable
-fun SellerUserScreen() {
-    Text(text = "User Screen")
+fun SellerUserScreen(viewModel: MainViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+        Text(text = "User Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+            IconButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    AuthUtils.signOut(viewModel.auth)
+                    coroutineScope.launch {
+                        viewModel.userPreferencesRepository.clearUserDetails()
+                        viewModel.userSelectionPreferencesRepository.clearSelectedMarketplace()
+                    }
+
+                }) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "Log out")
+                }
+            }
+
+    }
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, viewModel: MainViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    val selectedMarketplaceId by viewModel.selectedMarketPlaceId.collectAsState(initial = "")
+
+
     NavigationBar(
         modifier = Modifier
             .fillMaxWidth()
@@ -274,11 +356,17 @@ fun BottomNavigationBar(navController: NavController) {
                 selected = currentRoute == screen.route,
                 onClick = {
                     if (currentRoute != screen.route) {
-                        navController.navigate(screen.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
+                        if(screen.route == SealedSellerScreen.Products.route && selectedMarketplaceId.isNullOrEmpty()){
+                            showDialog = true
+                        }else if(screen.route == SealedSellerScreen.Orders.route && selectedMarketplaceId.isNullOrEmpty()){
+                            showDialog = true
+                        } else{
+                            navController.navigate(screen.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
                             }
                         }
                     }
@@ -299,5 +387,17 @@ fun BottomNavigationBar(navController: NavController) {
             )
         }
     }
+
+
+    // Dialog that shows when showDialog is true
+    DialogWithImage(
+        showDialog = showDialog,
+        onDismissRequest = { showDialog = false },
+        onConfirmation = { showDialog = false },
+        painter = painterResource(id = R.drawable.error_icon),
+        imageDescription = "Error Image",
+        dialogText = "Error: Please select a marketplace first"
+    )
 }
+
 

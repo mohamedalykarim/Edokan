@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.model.MarketPlace
@@ -32,41 +33,50 @@ class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
     @Inject lateinit var userSelectionPreferencesRepository: UserSelectionPreferencesRepository
+    @Inject lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            val homePageState by viewModel.homePageState.collectAsState()
-            val uiState by viewModel.uiState.collectAsState()
+            val role by viewModel.role.collectAsState(initial = "")
+            val showLoading by viewModel.showLoading.collectAsState(initial = true)
 
 
-            val countDownTimer = object : CountDownTimer(2000, 1000) {
+
+            val timer = object : CountDownTimer(4000, 1000) {
                 override fun onTick(p0: Long) {}
                 override fun onFinish() {
-                    viewModel.setHomePageState("START")
+                    viewModel.setShowLoading(false)
                 }
             }
-            countDownTimer.start()
+            timer.start()
 
 
-            when(homePageState){
-                "LOADING"->{
-                    SplashScreen(context = this@MainActivity, viewModel = viewModel)
+            when (role){
+                "CUSTOMER"->{
+                    CustomerMainUI(viewModel = viewModel)
+                }
+                "SELLER"->{
+                    Text(text = "Seller")
+                    SellerMainUI(this@MainActivity, viewModel = viewModel)
+                }
+                "DELIVERY"->{
                 }
 
-                "START"->{
-                    viewModel.navigateBasedOnRole()
-                    if (!AuthUtils.checkUserAuthentication()){
-                        LoginScreen(viewModel = viewModel)
-                    }else{
-                        val role by viewModel.role.collectAsState(initial = "")
-                        if (role != null) NavigateBasedInRole(viewModel, role!!)
-                    }
-
+                "", "null", null ->{
+                    LoginScreen(viewModel = viewModel)
                 }
+
+                else->{
+                    Log.d("TAG", "onCreate: from else"+role)
+                }
+
             }
 
-
+            if (showLoading){
+                SplashScreen(context = this, viewModel = viewModel)
+            }
         }
     }
 
@@ -78,8 +88,9 @@ class MainActivity : AppCompatActivity() {
             val cityId = viewModel.cityId.first()
             val marketplaceOwnerId =  viewModel.phoneNumber.first()
 
+            val selectedMarketPlace = viewModel.selectedMarketPlaceId.first()
 
-            if (viewModel.selectedMarketPlaceId.first().isNullOrEmpty()) {
+            if (selectedMarketPlace.isNullOrEmpty()) {
                 viewModel.fetchApprovedMarketPlaces(cityId ?: 0, marketplaceOwnerId ?: "")
             }
         }
@@ -101,23 +112,6 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-
-        }
-    }
-
-    @Composable
-    private fun NavigateBasedInRole(viewModel: MainViewModel, role : String) {
-        Log.d("TAG", "NavigateBasedInRole: "+role)
-        when (role){
-            "CUSTOMER"->{
-                CustomerMainUI(viewModel = viewModel)
-            }
-            "SELLER"->{
-                Text(text = "Seller")
-                SellerMainUI(this@MainActivity, viewModel = viewModel)
-            }
-            "DELIVERY"->{
             }
 
         }

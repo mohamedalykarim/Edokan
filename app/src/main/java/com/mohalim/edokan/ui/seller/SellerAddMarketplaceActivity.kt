@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -26,8 +27,10 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.mohalim.edokan.R
 import com.mohalim.edokan.core.utils.LocationUtils
 import com.mohalim.edokan.core.utils.Resource
+import com.mohalim.edokan.ui.main.DialogWithImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -56,7 +59,7 @@ class SellerAddMarketplaceActivity : AppCompatActivity() {
 
 
         setContent{
-            SellerAddMarketplaceScreen(viewModel = viewModel)
+            SellerAddMarketplaceScreen(this, viewModel = viewModel)
         }
     }
 
@@ -75,8 +78,7 @@ class SellerAddMarketplaceActivity : AppCompatActivity() {
                     }
 
                     is Resource.Success<*> ->{
-                        Toast.makeText(context, it.data.toString(), Toast.LENGTH_SHORT).show()
-                        finish()
+                        viewModel.setShowAddedDialog(true)
                     }
 
                     is Resource.Error<*> ->{
@@ -169,10 +171,11 @@ class SellerAddMarketplaceActivity : AppCompatActivity() {
 
 
 @Composable
-fun SellerAddMarketplaceScreen(viewModel: SellerAddMarketplaceViewModel) {
+fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplaceViewModel) {
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var isApproved by remember { mutableStateOf(false) }
     val screenStatus = viewModel.screenStatus.collectAsState()
+    val showAddedDialog by viewModel.showAddedDialog.collectAsState()
 
     val city by viewModel.city.collectAsState("")
     val phoneNumber by viewModel.phoneNumber.collectAsState("")
@@ -236,5 +239,14 @@ fun SellerAddMarketplaceScreen(viewModel: SellerAddMarketplaceViewModel) {
         ) {
             Text(text = "Add Marketplace")
         }
+        
+        DialogWithImage(
+            showDialog = showAddedDialog,
+            onDismissRequest = { (context as AppCompatActivity).finish() },
+            onConfirmation = { (context as AppCompatActivity).finish() },
+            painter = painterResource(id = R.drawable.added_successfully),
+            imageDescription = "Added Successfully Image",
+            dialogText = "The Marketplace has added successfully, It should be approved by administrator before proceed,"
+        )
     }
 }

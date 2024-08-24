@@ -37,6 +37,18 @@ class UserPreferencesRepository(private val context: Context) {
         }
     }
 
+    suspend fun setRole(role: String) {
+        context.dataStore.edit { preferences ->
+            preferences[ROLE_KEY] = role
+        }
+    }
+
+    suspend fun clearUserDetails() {
+        context.dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
     // Retrieve user details
     val userIdFlow: Flow<String?> = context.dataStore.data
         .map { preferences ->

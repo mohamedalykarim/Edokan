@@ -60,5 +60,11 @@ class UserSelectionPreferencesRepository(private val context: Context) {
         return marketPlace
     }
 
+    suspend fun clearSelectedMarketplace() {
+        context.dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
 
 }

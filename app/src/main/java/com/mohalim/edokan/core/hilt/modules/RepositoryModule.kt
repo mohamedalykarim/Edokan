@@ -1,6 +1,7 @@
 package com.mohalim.edokan.core.hilt.modules
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import dagger.Module
@@ -18,6 +19,12 @@ class RepositoryModule {
     @Provides
     fun provideFirestoreInstance(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseAuthInstance(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 
     @Singleton

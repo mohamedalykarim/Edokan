@@ -13,8 +13,10 @@ import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.model.MarketPlace
+import com.mohalim.edokan.core.utils.AuthUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,14 +28,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    val auth: FirebaseAuth,
     val userPreferencesRepository: UserPreferencesRepository,
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository,
     val sellerRepository: SellerRepository
 
 ) : ViewModel() {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private val _showLoading = MutableStateFlow(true)
+    val showLoading : StateFlow<Boolean> = _showLoading
 
     private val _marketplacesListStatus = MutableStateFlow<Any>(0)
     val marketplacesListStatus : MutableStateFlow<Any> = _marketplacesListStatus
@@ -43,7 +48,6 @@ class MainViewModel @Inject constructor(
     val uiState: StateFlow<VerificationState> = _uiState
 
     private val _homePageState = MutableStateFlow("LOADING")
-    val homePageState: StateFlow<String> = _homePageState
 
     private val _marketplaces = MutableStateFlow(emptyList<MarketPlace>())
     val marketplaces: StateFlow<List<MarketPlace>> = _marketplaces
@@ -68,6 +72,10 @@ class MainViewModel @Inject constructor(
 
     fun setMarketplaces(marketplaces: List<MarketPlace>) {
         _marketplaces.value = marketplaces
+    }
+
+    fun setShowLoading(value: Boolean) {
+        _showLoading.value = value
     }
 
     fun sendVerificationCode(phoneNumber: String) {
@@ -114,20 +122,24 @@ class MainViewModel @Inject constructor(
             try {
                 auth.signInWithCredential(credential).await()
                 _uiState.value = VerificationState.VerificationCompleted
-                navigateBasedOnRole()
+                checkIfUserDataIsExists(auth)
+
+
             } catch (e: Exception) {
-                _uiState.value = VerificationState.VerificationFailed(e)
+                Log.d("TAG", "signInWithPhoneAuthCredential: "+e.message)
             }
         }
     }
 
-    fun navigateBasedOnRole() {
-        val user = auth.currentUser ?: return
+    fun checkIfUserDataIsExists(firebaseAuth: FirebaseAuth) {
+        if (!AuthUtils.checkUserAuthentication(firebaseAuth)){
+            return
+        }
+
+        val user = firebaseAuth.currentUser ?: return
+
         db.collection("Users").document(user.phoneNumber.toString()).get().addOnSuccessListener { document ->
             if (document.exists()) {
-                val databaseRole = document.getString("role")
-                _uiState.value = VerificationState.Navigate(databaseRole ?: "")
-
                 viewModelScope.launch {
                     withContext(Dispatchers.IO){
                         userPreferencesRepository.saveUserDetails(
@@ -139,6 +151,10 @@ class MainViewModel @Inject constructor(
                             document.getLong("city_id")?.toInt() ?: 1,
                             document.getString("city").toString(),
                         )
+
+                        fetchApprovedMarketPlaces(document.getLong("city_id")?.toInt() ?: 0, document.getString("phoneNumber").toString())
+
+
                     }
                 }
 
@@ -154,7 +170,8 @@ class MainViewModel @Inject constructor(
                 )
                 db.collection("Users").document(user.phoneNumber.toString()).set(newUser)
                     .addOnSuccessListener {
-                        _uiState.value = VerificationState.Navigate("CUSTOMER")
+                        val cityId = 1;
+
                         viewModelScope.launch {
                             withContext(Dispatchers.IO){
                                 userPreferencesRepository.saveUserDetails(
@@ -163,28 +180,32 @@ class MainViewModel @Inject constructor(
                                     user.phoneNumber ?: "",
                                     user.photoUrl.toString(),
                                     "CUSTOMER",
-                                    1,
+                                    cityId = cityId,
                                     "Higaza"
                                 )
+
+                                fetchApprovedMarketPlaces(cityId, user.phoneNumber ?: "")
+
                             }
                         }
+
                     }
                     .addOnFailureListener { e ->
-                        _uiState.value = VerificationState.VerificationFailed(e)
+                        Log.d("TAG", ""+ e.message)
                     }
 
             }
         }.addOnFailureListener {
-            _uiState.value = VerificationState.VerificationFailed(it)
+            Log.d("TAG", "error")
         }
     }
 
 
     fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
+        Log.d("TAG", "fetchApprovedMarketPlaces: "+cityId + " " + marketplaceOwnerId)
         viewModelScope.launch{
             sellerRepository.getApprovedMarketPlaces(cityId, marketplaceOwnerId).collect{
                 _marketplacesListStatus.value = it
-                Log.d("TAG", "fetchApprovedMarketPlaces: "+cityId+" "+marketplaceOwnerId)
             }
         }
     }
@@ -207,6 +228,5 @@ sealed class VerificationState {
     object VerificationCompleted : VerificationState()
     data class VerificationFailed(val error: Exception) : VerificationState()
     data class CodeSent(val verificationId: String) : VerificationState()
-    data class Navigate(val role: String) : VerificationState()
     object RoleNotFound : VerificationState()
 }

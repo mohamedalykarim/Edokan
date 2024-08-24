@@ -17,6 +17,9 @@ class SellerAddMarketplaceViewModel @Inject constructor(val sellerRepository: Se
     private val _screenStatus = MutableStateFlow<Any>(0)
     val screenStatus : MutableStateFlow<Any> = _screenStatus
 
+    private val _showAddedDialog = MutableStateFlow(false)
+    val showAddedDialog : MutableStateFlow<Boolean> = _showAddedDialog
+
     private val _lat = MutableStateFlow<Double>(0.0)
     val lat : MutableStateFlow<Double> = _lat
 
@@ -29,6 +32,10 @@ class SellerAddMarketplaceViewModel @Inject constructor(val sellerRepository: Se
 
     fun setLng(lng: Double) {
         _lng.value = lng
+    }
+
+    fun setShowAddedDialog(value: Boolean) {
+        _showAddedDialog.value = value
     }
 
     val username: Flow<String?> = userPreferencesRepository.usernameFlow
@@ -62,7 +69,6 @@ class SellerAddMarketplaceViewModel @Inject constructor(val sellerRepository: Se
         private suspend fun saveMarketplace(marketplace: MarketPlace) {
             sellerRepository.addMarketPlace(marketplace).collect{
                 _screenStatus.value = it
-
             }
         }
 }
