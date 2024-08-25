@@ -89,6 +89,11 @@ dependencies {
     implementation (libs.accompanist.permissions)
     implementation (libs.androidx.activity.compose.v150)
 
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor)
+
+
 }
 
 // Allow references to generated code

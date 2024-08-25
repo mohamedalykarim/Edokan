@@ -3,12 +3,15 @@ package com.mohalim.edokan.core.hilt.modules
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mohalim.edokan.core.datasource.network.UserApiService
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
+import com.mohalim.edokan.core.datasource.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -29,7 +32,13 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideUserRepository(firestore: FirebaseFirestore): SellerRepository {
+    fun provideUserRepository(userApiService: UserApiService): UserRepository {
+        return UserRepository(userApiService)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSellerRepository(firestore: FirebaseFirestore): SellerRepository {
         return SellerRepository(firestore)
     }
 

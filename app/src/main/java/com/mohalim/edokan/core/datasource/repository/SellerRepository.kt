@@ -23,6 +23,11 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
 
     private val marketPlaceCollection = firestore.collection("Marketplaces")
 
+    /**
+     * Read User data by user ID
+     */
+
+
     fun addMarketPlace(marketPlace: MarketPlace): Flow<Resource<out String>> = flow {
         try {
             emit(Resource.Loading())

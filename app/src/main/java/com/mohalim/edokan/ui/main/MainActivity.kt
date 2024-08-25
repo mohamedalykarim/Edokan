@@ -95,6 +95,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.checkIfUserDataIsExists(firebaseAuth)
+
     }
 
     private fun observeMarketplacesListStatus(context: Context) {

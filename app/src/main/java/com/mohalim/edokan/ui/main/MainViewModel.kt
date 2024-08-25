@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
+import com.mohalim.edokan.core.datasource.repository.UserRepository
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.AuthUtils
@@ -23,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -34,7 +36,8 @@ class MainViewModel @Inject constructor(
     val auth: FirebaseAuth,
     val userPreferencesRepository: UserPreferencesRepository,
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository,
-    val sellerRepository: SellerRepository
+    val sellerRepository: SellerRepository,
+    val userRepository: UserRepository
 
 ) : ViewModel() {
 
@@ -160,6 +163,19 @@ class MainViewModel @Inject constructor(
         if (!AuthUtils.checkUserAuthentication(firebaseAuth)){
             return
         }
+
+        firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
+            Log.d("TAG", "checkIfUserDataIsExists: "+it.token)
+            viewModelScope.launch {
+                userRepository.getUserDataFromDatabaseById(it.token.toString(), firebaseAuth.currentUser!!.uid).collect{
+                    Log.d("TAG", "checkIfUserDataIsExists: "+it)
+                }
+            }
+
+        }
+
+
+
 
         val user = firebaseAuth.currentUser ?: return
 
