@@ -1,6 +1,8 @@
 package com.mohalim.edokan.ui.main
 
+import android.content.Context
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -71,7 +73,7 @@ class MainViewModel @Inject constructor(
 
     private fun fetchProducts(query: String) {
         viewModelScope.launch {
-            _products.value = sellerRepository.getProducts(query, 20L)
+            _products.value = sellerRepository.getProducts(query, 5L, selectedMarketPlaceId.toString())
         }
     }
 
@@ -106,7 +108,7 @@ class MainViewModel @Inject constructor(
         _showLoading.value = value
     }
 
-    fun sendVerificationCode(phoneNumber: String) {
+    fun sendVerificationCode(context: Context, phoneNumber: String) {
         var phone = phoneNumber
         if (phone.startsWith("0")) {
             phone.drop(1)
@@ -118,6 +120,7 @@ class MainViewModel @Inject constructor(
             .setPhoneNumber(phone)
             .setTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
             .setCallbacks(callbacks)
+            .setActivity(context as AppCompatActivity)
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
         _uiState.value = VerificationState.LoadingInitial
@@ -130,10 +133,13 @@ class MainViewModel @Inject constructor(
         }
 
         override fun onVerificationFailed(e: FirebaseException) {
+            Log.d("onVerificationFailed", ""+e.message)
             _uiState.value = VerificationState.VerificationFailed(e)
         }
 
         override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+            Log.d("onCodeSent", ""+token)
+
             this@MainViewModel.verificationId = verificationId
             resendingToken = token
             _uiState.value = VerificationState.CodeSent(verificationId)
@@ -167,8 +173,8 @@ class MainViewModel @Inject constructor(
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             Log.d("TAG", "checkIfUserDataIsExists: "+it.token)
             viewModelScope.launch {
-                userRepository.getUserDataFromDatabaseById(it.token.toString(), firebaseAuth.currentUser!!.uid).collect{
-                    Log.d("TAG", "checkIfUserDataIsExists: "+it)
+                userRepository.getUserDataFromDatabase(it.token.toString()).collect{
+
                 }
             }
 
@@ -251,7 +257,6 @@ class MainViewModel @Inject constructor(
 
 
     fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
-        Log.d("TAG", "fetchApprovedMarketPlaces: "+cityId + " " + marketplaceOwnerId)
         viewModelScope.launch{
             sellerRepository.getApprovedMarketPlaces(cityId, marketplaceOwnerId).collect{
                 _marketplacesListStatus.value = it

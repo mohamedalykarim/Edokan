@@ -111,7 +111,6 @@ fun SellerMainUI(context: Context, viewModel: MainViewModel) {
             }
             composable(SealedSellerScreen.Products.route) {
                 SellerProductsScreen(context, viewModel)
-
             }
             composable(SealedSellerScreen.Orders.route) {
                 SellerOrdersScreen()
@@ -499,6 +498,9 @@ fun BottomNavigationBar(navController: NavController, viewModel: MainViewModel) 
                                     saveState = true
                                 }
                             }
+
+                            if(screen.route == SealedSellerScreen.Products.route){
+                                viewModel.searchProducts(viewModel.searchQuery.value)                           }
                         }
                     }
                 },

@@ -64,7 +64,9 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
     }.flowOn(Dispatchers.IO)
 
 
-    suspend fun getProducts(searchQuery: String, limit: Long): List<Product> {
+    suspend fun getProducts(searchQuery: String, limit: Long, marketplaceOwnerId: String): List<Product> {
+
+        Log.d("TAG", ""+searchQuery)
         return try {
             var query = firestore.collection("Products")
                 .orderBy("productName")
@@ -72,8 +74,9 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
 
             if (searchQuery.isNotEmpty()) {
                 query = query.whereGreaterThanOrEqualTo("productName", searchQuery)
-                    .whereLessThanOrEqualTo("productName", "$searchQuery\uf8ff")
+                    .whereLessThanOrEqualTo("productName", "$searchQuery\uF8FF")
                     .whereEqualTo("productStatus", true)
+                    .whereEqualTo("marketPlaceId", marketplaceOwnerId)
             }
 
             val querySnapshot = query.get().await()

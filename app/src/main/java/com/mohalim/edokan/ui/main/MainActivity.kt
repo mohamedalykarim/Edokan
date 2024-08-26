@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 "", "null", null ->{
-                    LoginScreen(viewModel = viewModel)
+                    LoginScreen(context = this@MainActivity, viewModel = viewModel)
                 }
 
                 else->{

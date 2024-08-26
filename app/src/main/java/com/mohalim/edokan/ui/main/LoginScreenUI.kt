@@ -1,5 +1,6 @@
 package com.mohalim.edokan.ui.main
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +37,7 @@ import com.mohalim.edokan.R
 
 
 @Composable
-fun LoginScreen(viewModel: MainViewModel){
+fun LoginScreen(context: Context, viewModel: MainViewModel){
     val uiState by viewModel.uiState.collectAsState()
 
     var phoneNumber by remember { mutableStateOf("") }
@@ -87,7 +88,7 @@ fun LoginScreen(viewModel: MainViewModel){
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { viewModel.sendVerificationCode(phoneNumber) },
+                    onClick = { viewModel.sendVerificationCode(context, phoneNumber) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = (uiState is VerificationState.Initial && phoneNumber.length == 10) || (uiState is VerificationState.Initial && phoneNumber.length == 11)
 
