@@ -1,14 +1,16 @@
 package com.mohalim.edokan.core.model
 
+import com.google.gson.annotations.SerializedName
+
 data class User(
-    val userId:String = "",
-    val username:String = "",
-    val email:String = "",
-    val phoneNumber:String = "",
-    val imageUrl:String = "",
-    val role:String = "",
-    val cityId:Int = 0,
-    val cityName: String = "",
-    val points:Int = 0,
-    val isEnable:Boolean = true
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("username") val username: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("phone_number") val phoneNumber: String,
+    @SerializedName("image_url") val imageUrl: String,
+    @SerializedName("role") val role: String,
+    @SerializedName("city_id") val cityId: Int,
+    @SerializedName("city_name") val cityName: String,
+    @SerializedName("points") val points: Int,
+    @SerializedName("enabled") val isEnable: Int
 )

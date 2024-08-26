@@ -2,14 +2,16 @@ package com.mohalim.edokan.core.datasource.repository
 
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.JsonObject
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.mohalim.edokan.core.datasource.network.UserApiService
 import com.mohalim.edokan.core.model.User
+import com.mohalim.edokan.core.model.network.BooleanTypeAdapter
+import com.mohalim.edokan.core.model.network.UserResponse
 import com.mohalim.edokan.core.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import retrofit2.http.Body
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(val userApiService: UserApiService) {
@@ -19,22 +21,14 @@ class UserRepository @Inject constructor(val userApiService: UserApiService) {
         emit(Resource.Loading())
         try{
             val response = userApiService.getUserById(token)
-            if (response.isSuccessful){
-                response.body()?.let { responseBody ->
-                    // Convert the ResponseBody to a JSON string
-                    val jsonString = responseBody.string()
+            Log.d("TAG", "getUserDataFromDatabaseById: error "+ response.body())
 
-                    Log.d("TAG", "getUserDataFromDatabase: "+ responseBody.string())
+            if (response.isSuccessful) {
 
-                    // Convert JSON string to a JsonObject using Gson
-                    val jsonObject: JsonObject = Gson().fromJson(jsonString, JsonObject::class.java)
-
-                    // Now you can work with jsonObject
-                    println(jsonObject)
-                }
-            }else{
-                Log.d("TAG", "getUserDataFromDatabaseById: error ++"+ response.message()+ response.body())
+            } else {
+                println("Error: ${response.errorBody()?.string()}")
             }
+
         }catch (e:Exception){
             Log.d("TAG", "getUserDataFromDatabaseById: error "+ e.message)
 
