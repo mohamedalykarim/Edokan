@@ -1,25 +1,19 @@
 package com.mohalim.edokan.core.datasource.repository
 
 import android.util.Log
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
+import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 
-class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
+class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val sellerApiService: SellerApiService) {
 
     private val marketPlaceCollection = firestore.collection("Marketplaces")
 
@@ -28,15 +22,39 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
      */
 
 
-    fun addMarketPlace(marketPlace: MarketPlace): Flow<Resource<out String>> = flow {
-        try {
-            emit(Resource.Loading())
-            val docRef = marketPlaceCollection.document()
-            val marketPlaceWithId = marketPlace.copy(marketplaceId = docRef.id)
-            docRef.set(marketPlaceWithId).await()
-            emit(Resource.Success("Marketplace added successfully, Please wait for admin approval"))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
+    fun addMarketPlace(
+        token: String,
+        name: String,
+        lat:Double,
+        lng:Double,
+        cityId: Int,
+        cityName:String,
+        ownerId : String,
+        isApproved: Boolean): Flow<Resource<out Boolean>> = flow {
+
+        try{
+            val marketPlace = MarketPlace(
+                marketplaceName = name,
+                lat = lat,
+                lng = lng,
+                cityId = cityId,
+                city = cityName,
+                marketplaceOwnerId = ownerId,
+                isApproved = isApproved
+            )
+            val response = sellerApiService.addMarketplace(token, marketPlace)
+            if (response.isSuccessful) {
+                Log.d("TAG", "addMarketplace isSuccessful")
+                emit(Resource.Success(true))
+            } else {
+                Log.d("TAG", "addMarketplace else "+ response)
+
+                emit(Resource.Error(message = response.body()?.message.toString()))
+            }
+        }catch (e:Exception){
+            Log.d("TAG", "addMarketplace Exception "+ e.message)
+
+            emit(Resource.Error(""+e.message))
         }
     }.flowOn(Dispatchers.IO)
 

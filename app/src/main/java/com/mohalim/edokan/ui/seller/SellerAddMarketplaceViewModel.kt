@@ -2,6 +2,7 @@ package com.mohalim.edokan.ui.seller
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.model.MarketPlace
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class SellerAddMarketplaceViewModel @Inject constructor(val sellerRepository: SellerRepository, val userPreferencesRepository: UserPreferencesRepository) : ViewModel() {
+class SellerAddMarketplaceViewModel @Inject constructor(val firebaseAuth: FirebaseAuth, val sellerRepository: SellerRepository, val userPreferencesRepository: UserPreferencesRepository) : ViewModel() {
     private val _screenStatus = MutableStateFlow<Any>(0)
     val screenStatus : MutableStateFlow<Any> = _screenStatus
 
@@ -47,28 +48,21 @@ class SellerAddMarketplaceViewModel @Inject constructor(val sellerRepository: Se
 
 
     fun addMarketplace(
-            name: String, lat: Double, lng: Double,
-            cityId: Int,city: String, ownerId: String, isApproved: Boolean
+        name: String, lat: Double, lng: Double,
+        cityId: Int, cityName: String, ownerId: String, isApproved: Boolean
         ) {
+        firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             viewModelScope.launch {
-                val marketplace = MarketPlace(
-                    marketplaceId = "",  // Implement ID generation logic
-                    marketplaceName = name,
-                    lat = lat,
-                    lng = lng,
-                    cityId = cityId,
-                    city = city,
-                    marketplaceOwnerId = ownerId,
-                    isApproved = isApproved
-                )
-                // Call the repository or data source to save the marketplace
-                saveMarketplace(marketplace)
+                sellerRepository.addMarketPlace(it.token.toString(), name, lat, lng, cityId, cityName, ownerId, isApproved).collect{
+                    _screenStatus.value = it
+                }
             }
+        }
         }
 
-        private suspend fun saveMarketplace(marketplace: MarketPlace) {
-            sellerRepository.addMarketPlace(marketplace).collect{
-                _screenStatus.value = it
-            }
-        }
+
+
+
+
+
 }

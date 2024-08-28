@@ -173,29 +173,33 @@ class MainViewModel @Inject constructor(
         }
 
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
-            Log.d("TAG", "checkIfUserDataIsExists: "+it.token)
+            Log.d("TAG", "checkIfUserDataIsExists: "+ it.token)
             viewModelScope.launch {
                 userRepository.getUserDataFromDatabase(it.token.toString()).collect{
                     when(it){
                         is Resource.Loading->{}
                         is Resource.Success->{
+                            /**
+                             * User is exist
+                             * Loading data to the Prefs
+                             */
                             withContext(Dispatchers.IO){
-                                val cityId = it.data?.cityId.toString()
-                                val phoneNumber = it.data?.phoneNumber.toString()
-
                                 userPreferencesRepository.saveUserDetails(
                                     it.data?.userId.toString(),
                                     it.data?.username.toString(),
-                                    phoneNumber,
+                                    it.data?.phoneNumber.toString(),
                                     it.data?.imageUrl.toString(),
                                     it.data?.role.toString(),
-                                    cityId.toInt(),
+                                    it.data?.cityId ?: 0,
                                     it.data?.cityName.toString(),
                                 )
 
-
-                                fetchApprovedMarketPlaces(cityId.toInt(), phoneNumber)
-
+                                /**
+                                 * Start Fetching the Marketplaces
+                                 * Get all marketplaces for the current city of the seller
+                                 * #variables cityId, marketplaceOwnerId
+                                 */
+                                fetchApprovedMarketPlaces(it.data?.cityId ?: 0, it.data?.userId.toString())
 
                             }
 
