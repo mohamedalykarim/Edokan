@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.mohalim.edokan.core.datasource.network.UserApiService
 import com.mohalim.edokan.core.model.User
-import com.mohalim.edokan.core.model.network.BooleanTypeAdapter
 import com.mohalim.edokan.core.model.network.UserResponse
 import com.mohalim.edokan.core.utils.Resource
 import kotlinx.coroutines.Dispatchers
@@ -21,18 +20,17 @@ class UserRepository @Inject constructor(val userApiService: UserApiService) {
         emit(Resource.Loading())
         try{
             val response = userApiService.getUserById(token)
-            Log.d("TAG", "getUserDataFromDatabaseById: error "+ response.body())
-
             if (response.isSuccessful) {
-
+                response.body()?.let { userResponse ->
+                    val user = userResponse.result
+                    emit(Resource.Success(user))
+                }
             } else {
-                println("Error: ${response.errorBody()?.string()}")
+                emit(Resource.Error(message = response.body()?.message.toString()))
             }
-
         }catch (e:Exception){
-            Log.d("TAG", "getUserDataFromDatabaseById: error "+ e.message)
 
-            emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
+            emit(Resource.Error(""+e.message))
         }
     }
 

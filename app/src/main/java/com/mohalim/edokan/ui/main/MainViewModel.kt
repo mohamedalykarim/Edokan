@@ -19,7 +19,9 @@ import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.datasource.repository.UserRepository
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
+import com.mohalim.edokan.core.model.User
 import com.mohalim.edokan.core.utils.AuthUtils
+import com.mohalim.edokan.core.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -174,7 +176,34 @@ class MainViewModel @Inject constructor(
             Log.d("TAG", "checkIfUserDataIsExists: "+it.token)
             viewModelScope.launch {
                 userRepository.getUserDataFromDatabase(it.token.toString()).collect{
+                    when(it){
+                        is Resource.Loading->{}
+                        is Resource.Success->{
+                            withContext(Dispatchers.IO){
+                                val cityId = it.data?.cityId.toString()
+                                val phoneNumber = it.data?.phoneNumber.toString()
 
+                                userPreferencesRepository.saveUserDetails(
+                                    it.data?.userId.toString(),
+                                    it.data?.username.toString(),
+                                    phoneNumber,
+                                    it.data?.imageUrl.toString(),
+                                    it.data?.role.toString(),
+                                    cityId.toInt(),
+                                    it.data?.cityName.toString(),
+                                )
+
+
+                                fetchApprovedMarketPlaces(cityId.toInt(), phoneNumber)
+
+
+                            }
+
+                        }
+                        is Resource.Error->{
+                            Log.d("TAG", "checkIfUserDataIsExists: Resource.Error "+ it.message)
+                        }
+                    }
                 }
             }
 
@@ -188,25 +217,7 @@ class MainViewModel @Inject constructor(
         db.collection("Users").document(user.phoneNumber.toString()).get().addOnSuccessListener { document ->
             if (document.exists()) {
                 viewModelScope.launch {
-                    withContext(Dispatchers.IO){
-                        val cityId = document.getLong("cityId")
-                        val phoneNumber = document.getString("phoneNumber").toString()
 
-                        userPreferencesRepository.saveUserDetails(
-                            document.getString("uid").toString(),
-                            document.getString("username").toString(),
-                            phoneNumber,
-                            document.getString("imageUrl").toString(),
-                            document.getString("role").toString(),
-                            cityId!!.toInt(),
-                            document.getString("city").toString(),
-                        )
-
-
-                        fetchApprovedMarketPlaces(cityId.toInt(), phoneNumber)
-
-
-                    }
                 }
 
             } else {

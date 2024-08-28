@@ -43,7 +43,6 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore) {
 
 
     fun getApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String): Flow<Resource<out List<MarketPlace>>> = flow {
-        Log.d("TAG", "getApprovedMarketPlaces: "+cityId+" "+marketplaceOwnerId)
         try {
             emit(Resource.Loading())
 
