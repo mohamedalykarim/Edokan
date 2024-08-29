@@ -25,7 +25,7 @@ interface SellerApiService{
         @Path("marketplace_owner_id") marketplaceOwnerId: Int)
     : Response<MarketplacesResponse>
 
-    @POST("/Development/Marketplace/")
+    @POST("/Development/Marketplace/add-marketplace")
     suspend fun addMarketplace(
         @Header("Authorization") token: String,
         @Body data: MarketPlace

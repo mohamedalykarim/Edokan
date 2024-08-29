@@ -43,18 +43,19 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
                 isApproved = isApproved
             )
             val response = sellerApiService.addMarketplace(token, marketPlace)
+            Log.d("TAG", "addMarketPlace: " + response.body())
             if (response.isSuccessful) {
                 Log.d("TAG", "addMarketplace isSuccessful")
                 emit(Resource.Success(true))
             } else {
-                Log.d("TAG", "addMarketplace else "+ response)
+                Log.d("TAG", "addMarketplace else "+ response.body())
 
                 emit(Resource.Error(message = response.body()?.message.toString()))
             }
         }catch (e:Exception){
             Log.d("TAG", "addMarketplace Exception "+ e.message)
 
-            emit(Resource.Error(""+e.message))
+            emit(Resource.Error("Catch Error : "+e.message))
         }
     }.flowOn(Dispatchers.IO)
 

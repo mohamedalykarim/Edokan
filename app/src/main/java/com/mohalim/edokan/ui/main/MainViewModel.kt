@@ -174,6 +174,7 @@ class MainViewModel @Inject constructor(
 
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             Log.d("TAG", "checkIfUserDataIsExists: "+ it.token)
+            Log.d("TAG", "checkIfUserDataIsExists: "+ firebaseAuth.currentUser!!.uid)
             viewModelScope.launch {
                 userRepository.getUserDataFromDatabase(it.token.toString()).collect{
                     when(it){
