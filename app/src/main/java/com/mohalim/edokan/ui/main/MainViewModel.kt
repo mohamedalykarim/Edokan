@@ -41,8 +41,8 @@ class MainViewModel @Inject constructor(
     val userPreferencesRepository: UserPreferencesRepository,
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository,
     val sellerRepository: SellerRepository,
-    val userRepository: UserRepository
-
+    val userRepository: UserRepository,
+    val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -200,7 +200,7 @@ class MainViewModel @Inject constructor(
                                  * Get all marketplaces for the current city of the seller
                                  * #variables cityId, marketplaceOwnerId
                                  */
-                                fetchApprovedMarketPlaces(it.data?.cityId ?: 0, it.data?.userId.toString())
+                                fetchApprovedMarketPlaces(it.data?.cityId ?: 0)
 
                             }
 
@@ -255,7 +255,7 @@ class MainViewModel @Inject constructor(
                                     "Higaza"
                                 )
 
-                                fetchApprovedMarketPlaces(cityId, user.phoneNumber ?: "")
+                                fetchApprovedMarketPlaces(cityId)
 
                             }
                         }
@@ -272,12 +272,17 @@ class MainViewModel @Inject constructor(
     }
 
 
-    fun fetchApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String){
-        viewModelScope.launch{
-            sellerRepository.getApprovedMarketPlaces(cityId, marketplaceOwnerId).collect{
-                _marketplacesListStatus.value = it
+    fun fetchApprovedMarketPlaces(cityId: Int){
+        val uid = firebaseAuth.currentUser!!.uid
+        firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
+            viewModelScope.launch{
+                sellerRepository.getApprovedMarketPlaces(it.token.toString(), cityId, uid).collect{
+                    _marketplacesListStatus.value = it
+                }
             }
         }
+
+
     }
 
 

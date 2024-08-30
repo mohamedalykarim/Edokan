@@ -22,7 +22,7 @@ interface SellerApiService{
     suspend fun getMarketplacesByUserAndCity(
         @Header("Authorization") token: String,
         @Path("city_id") cityId: Int,
-        @Path("marketplace_owner_id") marketplaceOwnerId: Int)
+        @Path("marketplace_owner_id") marketplaceOwnerId: String)
     : Response<MarketplacesResponse>
 
     @POST("/Development/Marketplace/add-marketplace")

@@ -173,8 +173,8 @@ class SellerAddMarketplaceActivity : AppCompatActivity() {
 @Composable
 fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplaceViewModel) {
     var name by remember { mutableStateOf(TextFieldValue("")) }
-    var isApproved by remember { mutableStateOf(false) }
     val screenStatus = viewModel.screenStatus.collectAsState()
+    var showAddConfirmationDialog by remember { mutableStateOf(false) }
     val showAddedDialog by viewModel.showAddedDialog.collectAsState()
 
     val city by viewModel.city.collectAsState("")
@@ -225,21 +225,13 @@ fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplace
 
         Button(
             onClick = {
-                viewModel.addMarketplace(
-                    name.text,
-                    lat ,
-                    lng,
-                    1,
-                    "",
-                    phoneNumber!!,
-                    isApproved
-                )
+                showAddConfirmationDialog = !showAddConfirmationDialog
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Add Marketplace")
         }
-        
+
         DialogWithImage(
             showDialog = showAddedDialog,
             onDismissRequest = { (context as AppCompatActivity).finish() },
@@ -247,6 +239,29 @@ fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplace
             painter = painterResource(id = R.drawable.added_successfully),
             imageDescription = "Added Successfully Image",
             dialogText = "The Marketplace has added successfully, It should be approved by administrator before proceed,"
+        )
+
+        DialogWithImage(
+            showDialog = showAddConfirmationDialog,
+            onDismissRequest = {
+                showAddConfirmationDialog = !showAddConfirmationDialog
+            },
+            onConfirmation = {
+                viewModel.addMarketplace(
+                    name.text,
+                    lat ,
+                    lng,
+                    1,
+                    "Higaza",
+                    phoneNumber!!,
+                    0
+                )
+
+                showAddConfirmationDialog = !showAddConfirmationDialog
+            },
+            painter = painterResource(id = R.drawable.error_icon),
+            imageDescription = "Are you sure!",
+            dialogText = "Are you sure! You want to add this marketplace?"
         )
     }
 }

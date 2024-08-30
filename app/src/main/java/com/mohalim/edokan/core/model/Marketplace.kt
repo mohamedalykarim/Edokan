@@ -10,5 +10,5 @@ data class MarketPlace(
     @SerializedName("city_id") var cityId: Int = 0,
     @SerializedName("city_name") var city: String = "",
     @SerializedName("marketplace_owner_id") var marketplaceOwnerId: String = "",
-    @SerializedName("is_approved") var isApproved: Boolean = false
+    @SerializedName("is_approved") var isApproved: Int = 0
 )

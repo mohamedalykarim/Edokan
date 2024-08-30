@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
+import com.mohalim.edokan.core.model.network.MarketplacesResponse
 import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,7 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
         cityId: Int,
         cityName:String,
         ownerId : String,
-        isApproved: Boolean): Flow<Resource<out Boolean>> = flow {
+        isApproved: Int): Flow<Resource<out Boolean>> = flow {
 
         try{
             val marketPlace = MarketPlace(
@@ -43,7 +44,7 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
                 isApproved = isApproved
             )
             val response = sellerApiService.addMarketplace(token, marketPlace)
-            Log.d("TAG", "addMarketPlace: " + response.body())
+            Log.d("TAG", "addMarketPlace: " + response)
             if (response.isSuccessful) {
                 Log.d("TAG", "addMarketplace isSuccessful")
                 emit(Resource.Success(true))
@@ -61,22 +62,26 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
 
 
 
-    fun getApprovedMarketPlaces(cityId: Int, marketplaceOwnerId: String): Flow<Resource<out List<MarketPlace>>> = flow {
+    fun getApprovedMarketPlaces(token: String, cityId: Int, marketplaceOwnerId: String): Flow<Resource<out List<MarketPlace>>> = flow {
         try {
             emit(Resource.Loading())
-
-            val querySnapshot = firestore.collection("Marketplaces")
-                .whereEqualTo("approved", true)
-                .whereEqualTo("cityId", cityId)
-                .whereEqualTo("marketplaceOwnerId", marketplaceOwnerId)
-                .get()
-                .await()
-
-            val marketPlaces = querySnapshot.documents.mapNotNull { document ->
-                document.toObject(MarketPlace::class.java)?.copy(marketplaceId = document.id)
+            val response = sellerApiService.getMarketplacesByUserAndCity(token, cityId, marketplaceOwnerId)
+            Log.d("TAG", "getApprovedMarketPlaces: " + response.body())
+            if (response.isSuccessful){
+                val marketplaces : MutableList<MarketPlace> = ArrayList()
+                response.body()?.result?.forEach {
+                    marketplaces.add(it)
+                }
+                emit(Resource.Success(marketplaces))
+            }else{
+                emit(Resource.Error(message = response.body()?.message.toString()))
             }
-            emit(Resource.Success(marketPlaces))
+
+
+
         } catch (e: Exception) {
+            Log.d("TAG", "getApprovedMarketPlaces: " + e.message)
+
             emit(Resource.Error("Failed to fetch data: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)

@@ -131,8 +131,7 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
     val selectedMarketplaceName by viewModel.selectedMarketPlaceName.collectAsState(initial = "")
 
     val cityId by viewModel.cityId.collectAsState(initial = 0)
-    val phoneNumber by viewModel.phoneNumber.collectAsState(initial = "")
-    
+
 
     Scaffold(
         floatingActionButton = {
@@ -152,12 +151,13 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp),
+                .background(Color(parseColor("#fafafa"))),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
 
             Text(
                 text = "Welcome back! " + username,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.ExtraBold
             )
@@ -168,7 +168,9 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                     defaultElevation = 6.dp
                 ),
                     modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp)
                         .fillMaxWidth()
+
                 ) {
 
             if (selectedMarketplaceId.isNullOrEmpty()) {
@@ -188,40 +190,44 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
                  * there is selected marketplace
                  */
 
-                Text(text = "Selected Marketplace", style = MaterialTheme.typography.h6)
+                Text(text = "Selected Marketplace", modifier = Modifier.padding(16.dp))
 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .height(45.dp)
+                        .padding(vertical = 0.dp, horizontal = 16.dp)
                         .clickable {
                             viewModel.setSelectedMarketplace(MarketPlace())
-                            viewModel.fetchApprovedMarketPlaces(cityId ?: 0, phoneNumber ?: "")
+                            viewModel.fetchApprovedMarketPlaces(cityId ?: 0)
                         },
-                    backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.2f),
+                    backgroundColor = Color(parseColor("#f6192a")),
                     elevation = 4.dp
                 ) {
 
                     Row(
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(start = 16.dp, end = 16.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
+                            modifier = Modifier.size(20.dp),
                             imageVector = Icons.Default.Store,
                             contentDescription = null,
-                            tint = MaterialTheme.colors.primary
+                            tint = Color(parseColor("#ffffff"))
                         )
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Text(
                             text = selectedMarketplaceName ?: "",
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.primary
+                            fontSize = 12.sp,
+                            color = Color(parseColor("#ffffff"))
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+
 
             }
 
@@ -247,7 +253,7 @@ fun MarketplaceSelectionList(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(text = "Choose a Marketplace", style = MaterialTheme.typography.h6)
+        Text(text = "Choose a marketplace: ", color = Color(parseColor("#505050")))
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyColumn(modifier = Modifier
@@ -273,6 +279,7 @@ fun MarketplaceItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(45.dp)
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
         backgroundColor = if (isSelected) MaterialTheme.colors.primary.copy(alpha = 0.2f) else MaterialTheme.colors.surface,
@@ -280,11 +287,12 @@ fun MarketplaceItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
+                modifier = Modifier.size(20.dp),
                 imageVector = Icons.Default.Store,
                 contentDescription = null,
                 tint = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
@@ -292,6 +300,7 @@ fun MarketplaceItem(
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = marketplace.marketplaceName,
+                fontSize = 12.sp,
                 style = MaterialTheme.typography.body1,
                 color = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
             )

@@ -86,12 +86,10 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val cityId = viewModel.cityId.first()
-            val marketplaceOwnerId =  viewModel.phoneNumber.first()
-
             val selectedMarketPlace = viewModel.selectedMarketPlaceId.first()
 
             if (selectedMarketPlace.isNullOrEmpty()) {
-                viewModel.fetchApprovedMarketPlaces(cityId ?: 0, marketplaceOwnerId ?: "")
+                viewModel.fetchApprovedMarketPlaces(cityId ?: 0)
             }
         }
 
