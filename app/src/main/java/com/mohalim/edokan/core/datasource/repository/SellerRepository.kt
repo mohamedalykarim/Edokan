@@ -5,7 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
-import com.mohalim.edokan.core.model.network.MarketplacesResponse
+import com.mohalim.edokan.core.model.network.ProductByOwnerRequest
 import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -87,27 +87,15 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
     }.flowOn(Dispatchers.IO)
 
 
-    suspend fun getProducts(searchQuery: String, limit: Long, marketplaceOwnerId: String): List<Product> {
-
-        Log.d("TAG", ""+searchQuery)
-        return try {
-            var query = firestore.collection("Products")
-                .orderBy("productName")
-                .limit(limit)
-
-            if (searchQuery.isNotEmpty()) {
-                query = query.whereGreaterThanOrEqualTo("productName", searchQuery)
-                    .whereLessThanOrEqualTo("productName", "$searchQuery\uF8FF")
-                    .whereEqualTo("productStatus", true)
-                    .whereEqualTo("marketPlaceId", marketplaceOwnerId)
-            }
-
-            val querySnapshot = query.get().await()
-            querySnapshot.toObjects(Product::class.java)
-        } catch (e: Exception) {
-            emptyList()
+    suspend fun getProducts(token: String, searchQuery: String, limit: Long, marketplaceOwnerId: String): Flow<Resource<out List<Product>>> = flow<Resource<out List<Product>>> {
+        emit(Resource.Loading())
+        try {
+            val productRequest = ProductByOwnerRequest(searchQuery, limit, marketplaceOwnerId)
+            sellerApiService.getProducts(token, productRequest)
+        }catch (e : Exception){
+            emit(Resource.Error(e.message.toString()))
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun addProduct(product: Product): Flow<Resource<out Boolean>> = flow {
         emit(Resource.Loading())

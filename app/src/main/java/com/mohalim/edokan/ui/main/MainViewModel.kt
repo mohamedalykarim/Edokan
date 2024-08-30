@@ -75,7 +75,15 @@ class MainViewModel @Inject constructor(
 
     private fun fetchProducts(query: String) {
         viewModelScope.launch {
-            _products.value = sellerRepository.getProducts(query, 5L, selectedMarketPlaceId.toString())
+            firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
+                viewModelScope.launch {
+                    sellerRepository.getProducts(it.token.toString(), query, 5L, selectedMarketPlaceId.toString()).collect{
+
+                    }
+
+                }
+
+            }
         }
     }
 
