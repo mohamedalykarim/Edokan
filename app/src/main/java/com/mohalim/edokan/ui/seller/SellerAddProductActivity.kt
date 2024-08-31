@@ -22,6 +22,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.maryamrzdh.stepper.Stepper
 import com.mohalim.edokan.ui.seller.addproduct.Step1
 import com.mohalim.edokan.ui.seller.addproduct.Step2
+import com.mohalim.edokan.ui.seller.addproduct.Step3
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -118,6 +119,11 @@ fun SellerAddProductScreen(
                 startForProfileImageResult)
         }else if (currentStep == 2) {
             Step2(
+                context,
+                viewModel,
+                startForProfileImageResult)
+        }else if (currentStep == 3) {
+            Step3(
                 context,
                 viewModel,
                 startForProfileImageResult)

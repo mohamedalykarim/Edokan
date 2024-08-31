@@ -95,7 +95,7 @@ fun Step1(
 
                 Text(
                     text = "Choose a thumb image for the product",
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

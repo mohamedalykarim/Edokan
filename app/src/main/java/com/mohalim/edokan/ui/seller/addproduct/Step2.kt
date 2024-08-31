@@ -60,6 +60,8 @@ import coil.size.Size
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.mohalim.edokan.R
 import com.mohalim.edokan.ui.seller.SellerAddProductViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun Step2(
@@ -71,6 +73,16 @@ fun Step2(
     val productDescription by viewModel.productDescription.collectAsState()
     var productPrice by remember {mutableStateOf("0")}
     var productQuantity by remember {mutableStateOf("0")}
+
+    runBlocking(Dispatchers.IO) {
+        if (viewModel.productPrice.value > 0.0){
+            productPrice = viewModel.productPrice.value.toString()
+        }
+
+        if (viewModel.productQuantity.value > 0.0) {
+            productQuantity = viewModel.productQuantity.value.toString()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -94,7 +106,7 @@ fun Step2(
             ) {
                 Text(
                     text = "Fill the basic data for the product:",
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

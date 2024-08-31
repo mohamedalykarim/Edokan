@@ -52,6 +52,21 @@ class SellerAddProductViewModel @Inject constructor(
     private val _productQuantity = MutableStateFlow(0.0)
     val productQuantity : MutableStateFlow<Double> = _productQuantity
 
+    private val _productWidth = MutableStateFlow(0.0)
+    val productWidth : MutableStateFlow<Double> = _productWidth
+
+    private val _productHeight = MutableStateFlow(0.0)
+    val productHeight : MutableStateFlow<Double> = _productHeight
+
+    private val _productWeight = MutableStateFlow(0.0)
+    val productWeight : MutableStateFlow<Double> = _productWeight
+
+    private val _productLength = MutableStateFlow(0.0)
+    val productLength : MutableStateFlow<Double> = _productLength
+
+    private val _productDiscount = MutableStateFlow(0.0)
+    val productDiscount : MutableStateFlow<Double> = _productDiscount
+
 
     private val _imageUri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
     val imageUri : MutableStateFlow<Uri> = _imageUri
@@ -99,6 +114,10 @@ class SellerAddProductViewModel @Inject constructor(
         _imageUri.value = uri
     }
 
+    fun setImageProcess(imageProcess: String){
+        _imageProcess.value = imageProcess
+    }
+
     fun setProductName(productName: String){
         _productName.value = productName
     }
@@ -113,6 +132,26 @@ class SellerAddProductViewModel @Inject constructor(
 
     fun setProductQuantity(productQuantity: Double){
         _productQuantity.value = productQuantity
+    }
+
+    fun setProductWidth(productWidth: Double){
+        _productWidth.value = productWidth
+    }
+
+    fun setProductHeight(productHeight: Double){
+        _productHeight.value = productHeight
+    }
+
+    fun setProductWeight(productWeight: Double){
+        _productWeight.value = productWeight
+    }
+
+    fun setProductLength(productLength: Double){
+        _productLength.value = productLength
+    }
+
+    fun setProductDiscount(productDiscount: Double){
+        _productDiscount.value = productDiscount
     }
 
     fun setImage1Uri(uri: Uri) {
