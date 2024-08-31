@@ -16,7 +16,6 @@ import kotlinx.coroutines.tasks.await
 
 class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val sellerApiService: SellerApiService) {
 
-    private val marketPlaceCollection = firestore.collection("Marketplaces")
 
     /**
      * Read User data by user ID
@@ -44,19 +43,14 @@ class SellerRepository @Inject constructor(val firestore : FirebaseFirestore,val
                 isApproved = isApproved
             )
             val response = sellerApiService.addMarketplace(token, marketPlace)
-            Log.d("TAG", "addMarketPlace: " + response)
             if (response.isSuccessful) {
-                Log.d("TAG", "addMarketplace isSuccessful")
                 emit(Resource.Success(true))
             } else {
-                Log.d("TAG", "addMarketplace else "+ response.body())
-
-                emit(Resource.Error(message = response.body()?.message.toString()))
+                val errorBody = response.errorBody()?.string()
+                emit(Resource.Error(errorBody.toString()))
             }
         }catch (e:Exception){
-            Log.d("TAG", "addMarketplace Exception "+ e.message)
-
-            emit(Resource.Error("Catch Error : "+e.message))
+            emit(Resource.Error(""+ e.message))
         }
     }.flowOn(Dispatchers.IO)
 

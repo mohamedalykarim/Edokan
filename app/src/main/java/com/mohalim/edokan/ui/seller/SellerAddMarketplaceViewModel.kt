@@ -49,11 +49,12 @@ class SellerAddMarketplaceViewModel @Inject constructor(val firebaseAuth: Fireba
 
     fun addMarketplace(
         name: String, lat: Double, lng: Double,
-        cityId: Int, cityName: String, ownerId: String, isApproved: Int
+        cityId: Int, cityName: String, isApproved: Int
         ) {
+        val uid = firebaseAuth.currentUser?.uid
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             viewModelScope.launch {
-                sellerRepository.addMarketPlace(it.token.toString(), name, lat, lng, cityId, cityName, ownerId, isApproved).collect{
+                sellerRepository.addMarketPlace(it.token.toString(), name, lat, lng, cityId, cityName, uid.toString(), isApproved).collect{
                     _screenStatus.value = it
                 }
             }

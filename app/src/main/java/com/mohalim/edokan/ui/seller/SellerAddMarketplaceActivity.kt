@@ -253,7 +253,6 @@ fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplace
                     lng,
                     1,
                     "Higaza",
-                    phoneNumber!!,
                     0
                 )
 

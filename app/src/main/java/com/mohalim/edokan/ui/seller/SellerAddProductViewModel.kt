@@ -22,6 +22,7 @@ import androidx.core.content.FileProvider
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import okhttp3.internal.wait
 import java.io.File
@@ -34,6 +35,9 @@ class SellerAddProductViewModel @Inject constructor(
     val sellerRepository: SellerRepository,
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository
 ) : ViewModel(){
+
+    private val _currentStep = MutableStateFlow(1)
+    val currentStep : MutableStateFlow<Int> = _currentStep
 
     var selectedMarketplaceId = ""
     var selectedMarketplaceName = ""
@@ -51,6 +55,10 @@ class SellerAddProductViewModel @Inject constructor(
 
     private val _formState = MutableStateFlow(Product())
     val formState: StateFlow<Product> = _formState
+
+    fun setCurrentStep(step : Int){
+        _currentStep.value = step
+    }
 
     fun updateFormState(update: (Product) -> Product) {
         _formState.value = update(_formState.value)

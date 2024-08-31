@@ -5,5 +5,5 @@ import com.mohalim.edokan.core.model.User
 
 data class AddMarketplaceResponse(
     val message: String,
-    val result: MarketPlace
+    val result: Boolean
 )
