@@ -1,51 +1,83 @@
 package com.mohalim.edokan.ui.seller
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color.parseColor
-import android.net.Uri
 import android.os.Bundle
-import androidx.activity.compose.rememberLauncherForActivityResult
+import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
-import com.google.firebase.storage.FirebaseStorage
+import com.github.dhaval2404.imagepicker.ImagePicker
 import com.maryamrzdh.stepper.Stepper
-import com.mohalim.edokan.core.model.Step
 import com.mohalim.edokan.ui.seller.addproduct.Step1
+import com.mohalim.edokan.ui.seller.addproduct.Step2
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class SellerAddProductActivity : AppCompatActivity() {
     val viewModel: SellerAddProductViewModel by viewModels()
 
+
+    private val startForProfileImageResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            val resultCode = result.resultCode
+            val data = result.data
+
+            if (resultCode == Activity.RESULT_OK) {
+
+                data?.let {
+                    Log.d("TAG", "onActivityResult: "+data.getStringExtra("PROCESS"))
+                    val process = data.getStringExtra("PROCESS")
+                    Log.d("TAG", "onActivityResult: "+process)
+                    val fileUri = data.data!!
+
+
+                    if (viewModel.imageProcess.value == "THUMBNAIL"){
+                        viewModel.setImageUri(fileUri)
+                    }else if (viewModel.imageProcess.value == "IMAGE_1"){
+                        viewModel.setImage1Uri(fileUri)
+                    }else if (viewModel.imageProcess.value == "IMAGE_2"){
+                        viewModel.setImage2Uri(fileUri)
+                    }else if (viewModel.imageProcess.value == "IMAGE_3"){
+                        viewModel.setImage3Uri(fileUri)
+                    }else if (viewModel.imageProcess.value == "IMAGE_4"){
+                        viewModel.setImage4Uri(fileUri)
+                    }else{
+
+                    }
+                }
+
+
+
+
+            } else if (resultCode == ImagePicker.RESULT_ERROR) {
+            } else {
+            }
+        }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SellerAddProductScreen(this, viewModel)
+            SellerAddProductScreen(this, viewModel, startForProfileImageResult)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
     }
 }
 
@@ -53,6 +85,7 @@ class SellerAddProductActivity : AppCompatActivity() {
 fun SellerAddProductScreen(
     context: Context,
     viewModel: SellerAddProductViewModel,
+    startForProfileImageResult: ActivityResultLauncher<Intent>,
 ) {
     val formState by viewModel.formState.collectAsState()
     val currentStep by viewModel.currentStep.collectAsState()
@@ -82,7 +115,12 @@ fun SellerAddProductScreen(
             Step1(
                 context,
                 viewModel,
-                onNext = { viewModel.setCurrentStep(2) })
+                startForProfileImageResult)
+        }else if (currentStep == 2) {
+            Step2(
+                context,
+                viewModel,
+                startForProfileImageResult)
         }
 }
 

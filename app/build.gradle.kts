@@ -94,6 +94,8 @@ dependencies {
     implementation (libs.logging.interceptor)
 
     implementation(libs.compose.stepper)
+    implementation ("com.github.dhaval2404:imagepicker:2.1")
+
 
 
 

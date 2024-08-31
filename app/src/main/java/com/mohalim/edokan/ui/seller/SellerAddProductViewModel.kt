@@ -1,5 +1,6 @@
 package com.mohalim.edokan.ui.seller
 
+import android.content.ClipDescription
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -36,6 +37,40 @@ class SellerAddProductViewModel @Inject constructor(
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository
 ) : ViewModel(){
 
+    private val _imageProcess = MutableStateFlow<String>("THUMBNAIL")
+    val imageProcess : MutableStateFlow<String> = _imageProcess
+
+    private val _productName = MutableStateFlow("")
+    val productName : MutableStateFlow<String> = _productName
+
+    private val _productDescription = MutableStateFlow("")
+    val productDescription : MutableStateFlow<String> = _productDescription
+
+    private val _productPrice = MutableStateFlow(0.0)
+    val productPrice : MutableStateFlow<Double> = _productPrice
+
+    private val _productQuantity = MutableStateFlow(0.0)
+    val productQuantity : MutableStateFlow<Double> = _productQuantity
+
+
+    private val _imageUri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
+    val imageUri : MutableStateFlow<Uri> = _imageUri
+
+    private val _image1Uri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
+    val image1Uri : MutableStateFlow<Uri> = _image1Uri
+
+    private val _image2Uri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
+    val image2Uri : MutableStateFlow<Uri> = _image2Uri
+
+    private val _image3Uri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
+    val image3Uri : MutableStateFlow<Uri> = _image3Uri
+
+    private val _image4Uri = MutableStateFlow<Uri>(Uri.parse("android.resource://com.mohalim.edokan/drawable/image_placeholder"))
+    val image4Uri : MutableStateFlow<Uri> = _image4Uri
+
+
+
+
     private val _currentStep = MutableStateFlow(1)
     val currentStep : MutableStateFlow<Int> = _currentStep
 
@@ -58,6 +93,42 @@ class SellerAddProductViewModel @Inject constructor(
 
     fun setCurrentStep(step : Int){
         _currentStep.value = step
+    }
+
+    fun setImageUri(uri: Uri) {
+        _imageUri.value = uri
+    }
+
+    fun setProductName(productName: String){
+        _productName.value = productName
+    }
+
+    fun setProductDescription(productDescription: String){
+        _productDescription.value = productDescription
+    }
+
+    fun setProductPrice(productPrice: Double){
+        _productPrice.value = productPrice
+    }
+
+    fun setProductQuantity(productQuantity: Double){
+        _productQuantity.value = productQuantity
+    }
+
+    fun setImage1Uri(uri: Uri) {
+        _image1Uri.value = uri
+    }
+
+    fun setImage2Uri(uri: Uri) {
+        _image2Uri.value = uri
+    }
+
+    fun setImage3Uri(uri: Uri) {
+        _image3Uri.value = uri
+    }
+
+    fun setImage4Uri(uri: Uri) {
+        _image4Uri.value = uri
     }
 
     fun updateFormState(update: (Product) -> Product) {
