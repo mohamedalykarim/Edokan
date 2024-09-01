@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color.parseColor
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -11,14 +12,24 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.BorderStroke
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -183,53 +194,107 @@ fun SellerAddMarketplaceScreen(context: Context, viewModel: SellerAddMarketplace
     val lat by viewModel.lat.collectAsState()
     val lng by viewModel.lng.collectAsState()
 
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        TextField(
+        Text(
+            text = "Fill new marketplace data:",
+            modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
             value = name,
-            onValueChange = { name = it },
-            label = { Text("Marketplace Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = "$lat",
-            onValueChange = {  },
-            label = { Text("Latitude") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = "$lng",
-            onValueChange = {  },
-            label = { Text("Longitude") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-
-        if (screenStatus.value is Resource.Loading){
-            LinearProgressIndicator()
-        }
-
-
-        Button(
-            onClick = {
-                showAddConfirmationDialog = !showAddConfirmationDialog
+            label = {
+                Text("Marketplace Name", fontSize = 12.sp)
             },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Add Marketplace")
+            onValueChange = {
+                name = it
+            })
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = "$lat",
+            label = {
+                Text("Latitude", fontSize = 12.sp)
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+            ),
+            onValueChange = {
+                viewModel.setLat(it.toDouble())
+            })
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = "$lng",
+            label = {
+                Text("Longitude", fontSize = 12.sp)
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+            ),
+            onValueChange = {
+                viewModel.setLng(it.toDouble())
+            })
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            if (screenStatus.value is Resource.Loading){
+                LinearProgressIndicator()
+            }
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 4.dp),
+                border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
+                shape = RoundedCornerShape(10.dp),
+                onClick = {
+                    showAddConfirmationDialog = !showAddConfirmationDialog
+                }, colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color(
+                        parseColor("#f6192a"),
+                    )
+                )
+            ) {
+                Row {
+                    androidx.compose.material.Icon(
+                        Icons.Default.Add,
+                        modifier = Modifier.size(30.dp),
+                        tint = Color(parseColor("#f9f9f9")),
+                        contentDescription = "Add Marketplace"
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+
+                    Text("Add Marketplace", modifier = Modifier.padding(top = 3.dp), fontSize = 12.sp, color = Color(
+                        parseColor("#f9f9f9")
+                    )
+                    )
+
+
+
+                }
+
+            }
         }
 
         DialogWithImage(

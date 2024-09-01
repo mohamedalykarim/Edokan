@@ -23,6 +23,7 @@ import com.maryamrzdh.stepper.Stepper
 import com.mohalim.edokan.ui.seller.addproduct.Step1
 import com.mohalim.edokan.ui.seller.addproduct.Step2
 import com.mohalim.edokan.ui.seller.addproduct.Step3
+import com.mohalim.edokan.ui.seller.addproduct.Step4
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -91,8 +92,8 @@ fun SellerAddProductScreen(
     val formState by viewModel.formState.collectAsState()
     val currentStep by viewModel.currentStep.collectAsState()
 
-    val numberStep = 4
-    val titleList= arrayListOf("Image","Basics","Details","Review")
+    val numberStep = 5
+    val titleList= arrayListOf("Image","Basics","Details","Category", "Review")
 
 
     Column(
@@ -124,6 +125,11 @@ fun SellerAddProductScreen(
                 startForProfileImageResult)
         }else if (currentStep == 3) {
             Step3(
+                context,
+                viewModel,
+                startForProfileImageResult)
+        }else if (currentStep == 4) {
+            Step4(
                 context,
                 viewModel,
                 startForProfileImageResult)

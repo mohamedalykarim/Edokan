@@ -210,7 +210,7 @@ fun Step1(
                             Icons.Default.ChevronRight,
                             modifier = Modifier.size(30.dp),
                             tint = Color(parseColor("#f9f9f9")),
-                            contentDescription = "Gallery"
+                            contentDescription = "Next Step"
                         )
 
                     }
