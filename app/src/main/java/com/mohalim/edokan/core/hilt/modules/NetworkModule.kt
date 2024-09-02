@@ -1,5 +1,6 @@
 package com.mohalim.edokan.core.hilt.modules
 
+import com.mohalim.edokan.core.datasource.network.CategoryApiService
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.datasource.network.UserApiService
 import dagger.Module
@@ -34,5 +35,11 @@ object NetworkModule {
     @Singleton
     fun provideSellerApiService(retrofit: Retrofit): SellerApiService {
         return retrofit.create(SellerApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryApiService(retrofit: Retrofit): CategoryApiService {
+        return retrofit.create(CategoryApiService::class.java)
     }
 }

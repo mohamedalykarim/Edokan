@@ -181,10 +181,9 @@ class MainViewModel @Inject constructor(
         }
 
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
-            Log.d("TAG", "checkIfUserDataIsExists: "+ it.token)
-            Log.d("TAG", "checkIfUserDataIsExists: "+ firebaseAuth.currentUser!!.uid)
             viewModelScope.launch {
-                userRepository.getUserDataFromDatabase(it.token.toString()).collect{
+                val token = it.token.toString()
+                userRepository.getUserDataFromDatabase(token).collect{
                     when(it){
                         is Resource.Loading->{}
                         is Resource.Success->{
@@ -214,7 +213,12 @@ class MainViewModel @Inject constructor(
 
                         }
                         is Resource.Error->{
-                            Log.d("TAG", "checkIfUserDataIsExists: Resource.Error "+ it.message)
+                            if (it.message == "User not found"){
+                                val phoneNumber:String = firebaseAuth.currentUser?.phoneNumber.toString()
+                                userRepository.addNewUser(token, "", "", phoneNumber, "", 1, "Higaza").collect{
+                                    Log.d("TAG", "checkIfUserDataIsExists: "+it.message)
+                                }
+                            }
                         }
                     }
                 }

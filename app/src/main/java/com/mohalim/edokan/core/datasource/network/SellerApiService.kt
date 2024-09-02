@@ -14,7 +14,9 @@ import retrofit2.http.Path
 
 interface SellerApiService{
     @GET("/Development/User/get-user-by-id")
-    suspend fun getMarketplaceById(@Header("Authorization") token: String): Response<UserResponse>
+    suspend fun getMarketplaceById(
+        @Header("Authorization") token: String
+    ): Response<UserResponse>
 
     /**
      * Get Marketplaces for specific Seller

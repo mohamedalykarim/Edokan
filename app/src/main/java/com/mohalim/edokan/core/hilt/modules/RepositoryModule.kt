@@ -3,6 +3,7 @@ package com.mohalim.edokan.core.hilt.modules
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mohalim.edokan.core.datasource.network.CategoryApiService
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.datasource.network.UserApiService
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
@@ -39,8 +40,12 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideSellerRepository(firestore: FirebaseFirestore, sellerApiService: SellerApiService): SellerRepository {
-        return SellerRepository(firestore, sellerApiService)
+    fun provideSellerRepository(
+        firestore: FirebaseFirestore,
+        sellerApiService: SellerApiService,
+        categoryApiService: CategoryApiService): SellerRepository {
+
+        return SellerRepository(firestore, sellerApiService, categoryApiService)
     }
 
 

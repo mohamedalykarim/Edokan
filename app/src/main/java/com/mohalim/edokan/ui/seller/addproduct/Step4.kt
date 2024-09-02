@@ -104,6 +104,7 @@ fun Step4(
                     fontWeight = FontWeight.Bold
                 )
 
+
                 val options = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
                 var exp by remember { mutableStateOf(false) }
                 var searchText by remember { mutableStateOf("") }
@@ -120,6 +121,8 @@ fun Step4(
                         onValueChange = {
                             searchText = it
                             options.filter { it.contains(searchText) }
+
+                            viewModel.searchForCategories(it)
                         })
 
                     Column {

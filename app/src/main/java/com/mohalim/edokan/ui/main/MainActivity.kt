@@ -93,7 +93,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.checkIfUserDataIsExists(firebaseAuth)
 
     }
 

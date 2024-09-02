@@ -1,6 +1,7 @@
 package com.mohalim.edokan.core.datasource.network
 
 import androidx.browser.trusted.Token
+import com.mohalim.edokan.core.model.network.AddUserRequest
 import com.mohalim.edokan.core.model.network.UserResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -17,10 +18,6 @@ interface UserApiService {
     @POST("/Development/User/add-new-user")
     suspend fun addNewUser(
         @Header("Authorization") token: String,
-        @Body userName : String,
-        @Body phoneNumber : String,
-        @Body imageUrl : String,
-        @Body cityId : Int,
-        @Body cityName : String
+        @Body addUserRequest: AddUserRequest,
         ): Response<ResponseBody>
 }
