@@ -218,7 +218,27 @@ class MainViewModel @Inject constructor(
                             if (it.message == "User not found"){
                                 val phoneNumber:String = firebaseAuth.currentUser?.phoneNumber.toString()
                                 userRepository.addNewUser(token, "", "", phoneNumber, "", 1, "Higaza").collect{
+                                    when(it){
+                                        is Resource.Loading->{
 
+                                        }
+
+                                        is Resource.Success->{
+                                            userPreferencesRepository.saveUserDetails(
+                                                "",
+                                                "",
+                                                phoneNumber,
+                                                "",
+                                                "CUSTOMER",
+                                                1,
+                                                "Higaza",
+                                            )
+                                        }
+
+                                        is Resource.Error->{
+
+                                        }
+                                    }
                                 }
                             }
                         }
