@@ -183,6 +183,7 @@ class MainViewModel @Inject constructor(
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             viewModelScope.launch {
                 val token = it.token.toString()
+                Log.d("TAG", "checkIfUserDataIsExists: "+token)
                 userRepository.getUserDataFromDatabase(token).collect{
                     when(it){
                         is Resource.Loading->{}
@@ -191,6 +192,7 @@ class MainViewModel @Inject constructor(
                              * User is exist
                              * Loading data to the Prefs
                              */
+                            Log.d("TAG", "checkIfUserDataIsExists: User data retrieved "+it.data)
                             withContext(Dispatchers.IO){
                                 userPreferencesRepository.saveUserDetails(
                                     it.data?.userId.toString(),
@@ -216,7 +218,7 @@ class MainViewModel @Inject constructor(
                             if (it.message == "User not found"){
                                 val phoneNumber:String = firebaseAuth.currentUser?.phoneNumber.toString()
                                 userRepository.addNewUser(token, "", "", phoneNumber, "", 1, "Higaza").collect{
-                                    Log.d("TAG", "checkIfUserDataIsExists: "+it.message)
+
                                 }
                             }
                         }
@@ -279,13 +281,15 @@ class MainViewModel @Inject constructor(
 
             }
         }.addOnFailureListener {
-            Log.d("TAG", "error")
+
         }
     }
 
 
     fun fetchApprovedMarketPlaces(cityId: Int){
         val uid = firebaseAuth.currentUser!!.uid
+        if (uid.isNullOrEmpty()) return
+
         firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
             viewModelScope.launch{
                 sellerRepository.getApprovedMarketPlaces(it.token.toString(), cityId, uid).collect{

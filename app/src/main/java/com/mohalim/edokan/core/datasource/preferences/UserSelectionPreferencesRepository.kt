@@ -21,6 +21,15 @@ class UserSelectionPreferencesRepository(private val context: Context) {
         val SELECTED_MARKETPLACE_LNG = doublePreferencesKey("selected_marketplace_lng")
     }
 
+    suspend fun saveSelectedMarketplaceData(selectedMarketplaceId: String, selectedMarketplaceName: String, selectedMarketplaceLat: Double, selectedMarketplaceLng: Double){
+        context.dataStore.edit {
+            it[SELECTED_MARKETPLACE_ID] = selectedMarketplaceId
+            it[SELECTED_MARKETPLACE_NAME] = selectedMarketplaceName
+            it[SELECTED_MARKETPLACE_LAT] = selectedMarketplaceLat
+            it[SELECTED_MARKETPLACE_LNG] = selectedMarketplaceLng
+        }
+    }
+
     // set Selected Marketplace Id
     suspend fun setSelectedMarketplaceId(selectedMarketplaceId: String) {
         context.dataStore.edit { preferences ->
@@ -104,9 +113,7 @@ class UserSelectionPreferencesRepository(private val context: Context) {
     }
 
     suspend fun clearSelectedMarketplace() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
-        }
+        saveSelectedMarketplaceData("", "", 0.0, 0.0)
     }
 
 

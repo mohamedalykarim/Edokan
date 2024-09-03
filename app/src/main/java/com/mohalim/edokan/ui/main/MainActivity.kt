@@ -22,6 +22,7 @@ import com.mohalim.edokan.core.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -65,11 +66,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 "", "null", null ->{
+                    Log.d("TAG", "onCreate: ${role}")
                     LoginScreen(context = this@MainActivity, viewModel = viewModel)
                 }
 
                 else->{
-                    Log.d("TAG", "onCreate: from else"+role)
                 }
 
             }
@@ -82,21 +83,37 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        observeMarketplacesListStatus(this)
 
-        lifecycleScope.launch {
-            val cityId = viewModel.cityId.first()
-            val selectedMarketPlace = viewModel.selectedMarketPlaceId.first()
+        observeRole()
 
-            if (selectedMarketPlace.isNullOrEmpty()) {
-                viewModel.fetchApprovedMarketPlaces(cityId ?: 0)
-            }
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.checkIfUserDataIsExists(firebaseAuth)
+
         }
-
 
     }
 
-    private fun observeMarketplacesListStatus(context: Context) {
+    private fun observeRole() {
+        lifecycleScope.launch {
+            viewModel.role.collect{
+                /**
+                 * Seller | CHECK IF MARKETPLACE IS SELECTED
+                 */
+                if (it.equals("SELLER")){
+                    observeSellerMarketplacesListStatus(this@MainActivity)
+
+                    val cityId = viewModel.cityId.first()
+                    val selectedMarketPlace = viewModel.selectedMarketPlaceId.first()
+
+                    if (selectedMarketPlace.isNullOrEmpty()) {
+                        viewModel.fetchApprovedMarketPlaces(cityId ?: 0)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeSellerMarketplacesListStatus(context: Context) {
         lifecycleScope.launch {
             viewModel.marketplacesListStatus.collect{
                 when(it){

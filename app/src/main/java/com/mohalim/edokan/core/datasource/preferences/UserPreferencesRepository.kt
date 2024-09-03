@@ -44,9 +44,7 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     suspend fun clearUserDetails() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
-        }
+        saveUserDetails("", "", "", "", "", 0, "")
     }
 
     // Retrieve user details
