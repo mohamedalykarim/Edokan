@@ -188,6 +188,7 @@ class MainViewModel @Inject constructor(
                     when(it){
                         is Resource.Loading->{}
                         is Resource.Success->{
+                            setShowLoading(false)
                             /**
                              * User is exist
                              * Loading data to the Prefs
@@ -215,6 +216,8 @@ class MainViewModel @Inject constructor(
 
                         }
                         is Resource.Error->{
+                            setShowLoading(false)
+
                             if (it.message == "User not found"){
                                 val phoneNumber:String = firebaseAuth.currentUser?.phoneNumber.toString()
                                 userRepository.addNewUser(token, "", "", phoneNumber, "", 1, "Higaza").collect{

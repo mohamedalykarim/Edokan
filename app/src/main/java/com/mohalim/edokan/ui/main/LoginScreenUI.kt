@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -65,24 +66,29 @@ fun LoginScreen(context: Context, viewModel: MainViewModel){
 
             if (uiState is VerificationState.Initial || uiState is VerificationState.LoadingInitial) {
                 Row {
-                    TextField(
+
+                    OutlinedTextField(
+                        modifier = Modifier.width(100.dp).height(70.dp),
                         value = "+20",
-                        onValueChange = {  },
-                        label = { Text("Egypt") },
-                        enabled = false,
-                        modifier = Modifier.width(100.dp)
-                    )
+                        label = {
+                            Text("Egypt", fontSize = 12.sp)
+                        },
+                        onValueChange = {})
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-
-                    TextField(
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth().height(70.dp),
                         value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        label = { Text("Phone Number") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        label = {
+                            Text("Phone Number", fontSize = 12.sp)
+                        },
+                        onValueChange = {
+                            phoneNumber = it
+                        })
+
+
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -107,18 +113,25 @@ fun LoginScreen(context: Context, viewModel: MainViewModel){
             }
 
             if (uiState is VerificationState.CodeSent || uiState is VerificationState.VerificationFailed || uiState is VerificationState.LoadingCodeSent) {
-                TextField(
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
                     value = otpCode,
-                    onValueChange = { otpCode = it },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    label = { Text("Enter OTP") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    label = {
+                        Text("OTP Code", fontSize = 12.sp)
+                    },
+                    onValueChange = {
+                        otpCode = it
+                    })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { viewModel.verifyCode(otpCode) },
+                    onClick = {
+                        viewModel.verifyCode(otpCode)
+                        viewModel.setShowLoading(true)
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = uiState is VerificationState.CodeSent && otpCode.length == 6
                 ) {

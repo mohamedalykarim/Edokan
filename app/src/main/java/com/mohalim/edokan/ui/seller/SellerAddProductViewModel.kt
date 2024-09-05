@@ -22,6 +22,8 @@ import javax.inject.Inject
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
+import com.mohalim.edokan.core.model.Category
+import com.mohalim.edokan.core.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,6 +69,16 @@ class SellerAddProductViewModel @Inject constructor(
 
     private val _productDiscount = MutableStateFlow(0.0)
     val productDiscount: MutableStateFlow<Double> = _productDiscount
+
+    private val _categories = MutableStateFlow(ArrayList<Category>())
+    val categories: MutableStateFlow<ArrayList<Category>> = _categories
+
+    private val _chosenCategories = MutableStateFlow(ArrayList<Category>())
+    val chosenCategories: MutableStateFlow<ArrayList<Category>> = _chosenCategories
+
+
+    private val _isCategoriesSearchExpanded = MutableStateFlow(false)
+    val isCategoriesSearchExpanded: MutableStateFlow<Boolean> = _isCategoriesSearchExpanded
 
 
     private val _imageUri =
@@ -178,6 +190,28 @@ class SellerAddProductViewModel @Inject constructor(
         _image4Uri.value = uri
     }
 
+    fun setCategories(categories: List<Category>){
+        _categories.value.clear()
+        _categories.value.addAll(categories)
+    }
+
+    fun addToChosenCategories(category: Category){
+        val filtered = _chosenCategories.value.filter { it.categoryId.equals(category.categoryId) }
+        if (filtered.isNullOrEmpty()){
+            _chosenCategories.value = _chosenCategories.value.toMutableList().apply {
+                add(category)
+            } as ArrayList<Category>
+        }
+    }
+
+    fun removeFromChosenCategories(category: Category){
+        _chosenCategories.value.remove(category)
+    }
+
+    fun setIsCategoriesSearchExpanded(expanded : Boolean){
+        _isCategoriesSearchExpanded.value = expanded
+    }
+
     fun updateFormState(update: (Product) -> Product) {
         _formState.value = update(_formState.value)
     }
@@ -215,10 +249,31 @@ class SellerAddProductViewModel @Inject constructor(
     }
 
     fun searchForCategories(categoryName: String) {
+        Log.d("TAG", "categoryName "+ categoryName)
         firebaseAuth.currentUser?.getIdToken(true)?.addOnSuccessListener {
             viewModelScope.launch {
                 sellerRepository.getCategoriesByName(it.token.toString(), categoryName).collect {
-                    Log.d("TAG", "searchForCategories: " + it)
+                    when(it){
+                        is Resource.Loading->{
+
+                        }
+
+                        is Resource.Success->{
+                            if(!it.data.isNullOrEmpty()){
+                                setCategories(it.data)
+                                if (it.data.size > 0){
+                                    setIsCategoriesSearchExpanded(true)
+                                }
+                            }
+
+
+                        }
+
+                        is Resource.Error->{
+                            Log.d("Tag", it.message+"")
+
+                        }
+                    }
                 }
         }
     }

@@ -1,10 +1,12 @@
 package com.mohalim.edokan.ui.seller.addproduct
 
+import android.app.LocaleManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
 import android.net.Uri
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
@@ -26,10 +28,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChevronRight
@@ -43,12 +47,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,30 +64,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
-import com.github.dhaval2404.imagepicker.ImagePicker
-import com.mohalim.edokan.R
+import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mohalim.edokan.core.model.Category
 import com.mohalim.edokan.ui.seller.SellerAddProductViewModel
+import kotlinx.coroutines.flow.filter
+import java.util.Calendar
+import java.util.Locale
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Step4(
     context: Context,
     viewModel: SellerAddProductViewModel,
     startForProfileImageResult: ActivityResultLauncher<Intent>,
 ) {
+    val chosenCategories by viewModel.chosenCategories.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+
+        Text(text = "chosenCategories = " + chosenCategories.size)
+
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
@@ -104,62 +117,22 @@ fun Step4(
                     fontWeight = FontWeight.Bold
                 )
 
+                AutocompleteTextFieldExample(viewModel)
 
-                val options = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
-                var exp by remember { mutableStateOf(false) }
-                var searchText by remember { mutableStateOf("") }
 
-                Column {
-
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = searchText,
-                        label = {
-                            Text("Category", fontSize = 12.sp)
-                        },
-                        maxLines = 1,
-                        onValueChange = {
-                            searchText = it
-                            options.filter { it.contains(searchText) }
-
-                            viewModel.searchForCategories(it)
-                        })
-
-                    Column {
-                        var i = 0
-                        options.forEach {
-                            var topMargin = 3.dp
-                            if (i == 0) {
-                                topMargin = 0.dp
-                            }
-                            Column(modifier = Modifier
-                                .padding(start = 4.dp, top = topMargin)
-                                .fillMaxWidth()
-                                .background(color = Color.White)
-                                .padding(10.dp)) {
-                                Text(text = ""+it, fontSize = 11.sp)
-                            }
-                            i++
-                        }
-                    }
-                }
 
 
 
                 FlowRow() {
-                    Button(modifier = Modifier.padding(start = 4.dp), shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
-                        Text(text = "Supermarket", fontSize = 10.sp)
-                    }
-
-                    Button(modifier = Modifier.padding(start = 4.dp),shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
-                        Text(text = "Vegetables", fontSize = 11.sp)
-                    }
-
-                    Button(modifier = Modifier.padding(start = 4.dp),shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
-                        Text(text = "Herbalist", fontSize = 11.sp)
-                    }
-                    Button(modifier = Modifier.padding(start = 4.dp),shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
-                        Text(text = "Pharmacy", fontSize = 11.sp)
+                    chosenCategories.forEach {category->
+                        Button(modifier = Modifier.padding(start = 4.dp), shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
+                            Text(
+                                text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
+                                fontSize = 10.sp,
+                                modifier = Modifier.clickable {
+                                    viewModel.removeFromChosenCategories(category)
+                                })
+                        }
                     }
                 }
                 
@@ -172,7 +145,7 @@ fun Step4(
                     border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
-                        viewModel.setCurrentStep(4)
+                        viewModel.setCurrentStep(5)
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color(parseColor("#f6192a"),
                         ))
@@ -190,6 +163,64 @@ fun Step4(
 
                     }
 
+                }
+            }
+        }
+    }
+}
+
+
+
+
+@Composable
+fun AutocompleteTextFieldExample(
+    viewModel: SellerAddProductViewModel,
+) {
+    // State variables for the input text and suggestions
+    var text by remember { mutableStateOf("") }
+    val isCategoriesSearchExpanded by viewModel.isCategoriesSearchExpanded.collectAsState(initial = false)
+    val categories by viewModel.categories.collectAsState()
+    var savedTime = 0L
+
+    val countDownTimer = object : CountDownTimer(2000,100) {
+        override fun onTick(millisUntilFinished: Long) {}
+
+        override fun onFinish() {
+            viewModel.searchForCategories(text)
+        }
+
+    }
+
+    Column {
+        // TextField with autocomplete functionality
+        OutlinedTextField(
+            value = text,
+            onValueChange = {
+                text = it
+                countDownTimer.start()
+                Log.d("Tag", "difference " + (Calendar.getInstance().timeInMillis - savedTime))
+                if(it == "" && savedTime != 0L && (Calendar.getInstance().timeInMillis - savedTime) < 1000){
+                    countDownTimer.cancel()
+                }
+                savedTime = Calendar.getInstance().timeInMillis
+            },
+            label = { Text("Search Category") },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        // Display dropdown menu with filtered suggestions
+        DropdownMenu(
+            expanded = isCategoriesSearchExpanded,
+            onDismissRequest = { viewModel.setIsCategoriesSearchExpanded(false) },
+        ) {
+            categories.forEach { suggestion ->
+                DropdownMenuItem(
+                    onClick = {
+                        viewModel.addToChosenCategories(suggestion)
+                        viewModel.setIsCategoriesSearchExpanded(false)
+                    }) {
+                    Text(text = if (Locale.getDefault().language.equals("en")) suggestion.categoryName else suggestion.categoryNameAr)
                 }
             }
         }

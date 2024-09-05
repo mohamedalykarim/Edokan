@@ -34,7 +34,7 @@ class SellerRepository @Inject constructor(
                 }
                 emit(Resource.Success(categories))
             }else{
-                emit(Resource.Error(message = response.body()?.message.toString()))
+                emit(Resource.Error(message = response.errorBody()?.string()+""))
             }
 
         }catch (e : Exception){
