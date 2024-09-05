@@ -20,12 +20,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.DropdownMenu
@@ -37,7 +39,10 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPasteSearch
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -50,6 +55,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -61,13 +67,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
@@ -92,8 +101,6 @@ fun Step4(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-
-        Text(text = "chosenCategories = " + chosenCategories.size)
 
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
@@ -125,13 +132,46 @@ fun Step4(
 
                 FlowRow() {
                     chosenCategories.forEach {category->
-                        Button(modifier = Modifier.padding(start = 4.dp), shape = RoundedCornerShape(10.dp), onClick = {  }) {
-                            Text(
-                                text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
-                                fontSize = 10.sp,
-                                modifier = Modifier.clickable {
-                                    viewModel.removeFromChosenCategories(category)
-                                })
+                        Button(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .height(40.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color(parseColor("#f6192a"),
+                                )),
+                            onClick = {
+                                viewModel.removeFromChosenCategories(category)
+                            }) {
+
+                            Row(modifier = Modifier.height(40.dp)) {
+
+                                Column(modifier = Modifier
+                                    .height(40.dp)
+                                    .wrapContentHeight(Alignment.CenterVertically)) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Remove",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Text(
+                                    text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
+                                    fontSize = 9.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.clickable {
+                                        viewModel.removeFromChosenCategories(category)
+                                    })
+
+                            }
+
+
+
                         }
                     }
                 }
@@ -180,7 +220,7 @@ fun AutocompleteTextFieldExample(
     var text by remember { mutableStateOf("") }
     val isCategoriesSearchExpanded by viewModel.isCategoriesSearchExpanded.collectAsState(initial = false)
     val categories by viewModel.categories.collectAsState()
-    var savedTime = 0L
+
 
     val countDownTimer = object : CountDownTimer(2000,100) {
         override fun onTick(millisUntilFinished: Long) {}
@@ -192,21 +232,55 @@ fun AutocompleteTextFieldExample(
     }
 
     Column {
-        // TextField with autocomplete functionality
-        OutlinedTextField(
+
+        TextField(
             value = text,
             onValueChange = {
                 text = it
                 countDownTimer.start()
-                Log.d("Tag", "difference " + (Calendar.getInstance().timeInMillis - savedTime))
-                if(it == "" && savedTime != 0L && (Calendar.getInstance().timeInMillis - savedTime) < 1000){
+                if(it == "" || (Calendar.getInstance().timeInMillis - viewModel.savedTime) < 1000){
                     countDownTimer.cancel()
                 }
-                savedTime = Calendar.getInstance().timeInMillis
+
+                viewModel.savedTime = Calendar.getInstance().timeInMillis
             },
-            label = { Text("Search Category") },
             modifier = Modifier
+                .padding(vertical = 15.dp, horizontal = 15.dp)
                 .fillMaxWidth()
+                .height(60.dp)
+                .shadow(elevation = 2.dp, shape = RoundedCornerShape(32.dp)),
+            shape = RoundedCornerShape(32.dp),
+            leadingIcon = {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.ContentPasteSearch,
+                    contentDescription = "Search"
+                )
+            },
+            trailingIcon = {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
+                )
+            },
+            placeholder = {
+                Text(
+                    text = "Search Category",
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            },
+            singleLine = true,
+            textStyle = TextStyle.Default.copy(fontSize = 11.sp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color(parseColor("#ffffff")),
+                unfocusedContainerColor = Color(parseColor("#ffffff")),
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                disabledBorderColor = Color.Transparent
+            )
         )
 
         // Display dropdown menu with filtered suggestions
@@ -219,6 +293,7 @@ fun AutocompleteTextFieldExample(
                     onClick = {
                         viewModel.addToChosenCategories(suggestion)
                         viewModel.setIsCategoriesSearchExpanded(false)
+                        text = ""
                     }) {
                     Text(text = if (Locale.getDefault().language.equals("en")) suggestion.categoryName else suggestion.categoryNameAr)
                 }

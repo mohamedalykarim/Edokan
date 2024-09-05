@@ -24,6 +24,7 @@ import com.mohalim.edokan.ui.seller.addproduct.Step1
 import com.mohalim.edokan.ui.seller.addproduct.Step2
 import com.mohalim.edokan.ui.seller.addproduct.Step3
 import com.mohalim.edokan.ui.seller.addproduct.Step4
+import com.mohalim.edokan.ui.seller.addproduct.Step5
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -130,6 +131,11 @@ fun SellerAddProductScreen(
                 startForProfileImageResult)
         }else if (currentStep == 4) {
             Step4(
+                context,
+                viewModel,
+                startForProfileImageResult)
+        }else if (currentStep == 5) {
+            Step5(
                 context,
                 viewModel,
                 startForProfileImageResult)

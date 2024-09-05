@@ -40,6 +40,8 @@ class SellerAddProductViewModel @Inject constructor(
     val userSelectionPreferencesRepository: UserSelectionPreferencesRepository
 ) : ViewModel() {
 
+    var savedTime = 0L
+
     private val _imageProcess = MutableStateFlow<String>("THUMBNAIL")
     val imageProcess: MutableStateFlow<String> = _imageProcess
 
@@ -205,7 +207,9 @@ class SellerAddProductViewModel @Inject constructor(
     }
 
     fun removeFromChosenCategories(category: Category){
-        _chosenCategories.value.remove(category)
+        _chosenCategories.value = _chosenCategories.value.toMutableList().apply {
+            remove(category)
+        } as ArrayList<Category>
     }
 
     fun setIsCategoriesSearchExpanded(expanded : Boolean){

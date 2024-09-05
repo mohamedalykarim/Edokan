@@ -38,6 +38,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,6 +47,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -71,8 +73,8 @@ fun Step2(
 ) {
     val productName by viewModel.productName.collectAsState()
     val productDescription by viewModel.productDescription.collectAsState()
-    var productPrice by remember {mutableStateOf("0")}
-    var productQuantity by remember {mutableStateOf("0")}
+    var productPrice by remember {mutableStateOf("")}
+    var productQuantity by remember {mutableStateOf("")}
 
     runBlocking(Dispatchers.IO) {
         if (viewModel.productPrice.value > 0.0){
@@ -113,27 +115,63 @@ fun Step2(
 
                 OutlinedTextField(
                     value = productName,
-                    label = {
+                    placeholder = {
                         Text("Product Name", fontSize = 12.sp)
                     },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color(parseColor("#CE0F1E")),
+                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                        errorLabelColor = Color(parseColor("#CE0F1E"))
+                    ),
+                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    shape = RoundedCornerShape(32.dp),
                     onValueChange = {
                         viewModel.setProductName(it)
                     })
 
                 OutlinedTextField(
                     value = productDescription,
-                    label = {
+                    placeholder = {
                         Text("Product Description", fontSize = 12.sp)
                     },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color(parseColor("#CE0F1E")),
+                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                        errorLabelColor = Color(parseColor("#CE0F1E"))
+                    ),
+                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    shape = RoundedCornerShape(32.dp),
                     onValueChange = {
                         viewModel.setProductDescription(it)
                     })
 
                 OutlinedTextField(
                     value = productPrice,
-                    label = {
+                    placeholder = {
                         Text("Product Price", fontSize = 12.sp)
                     },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color(parseColor("#CE0F1E")),
+                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                        errorLabelColor = Color(parseColor("#CE0F1E"))
+                    ),
+                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    shape = RoundedCornerShape(32.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
@@ -147,10 +185,21 @@ fun Step2(
 
                 OutlinedTextField(
                     value = productQuantity,
-                    label = {
+                    placeholder = {
                         Text("Product Quantity", fontSize = 12.sp)
                     },
-
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color(parseColor("#CE0F1E")),
+                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                        errorLabelColor = Color(parseColor("#CE0F1E"))
+                    ),
+                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    shape = RoundedCornerShape(32.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
