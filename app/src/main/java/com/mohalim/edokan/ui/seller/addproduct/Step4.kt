@@ -125,7 +125,7 @@ fun Step4(
 
                 FlowRow() {
                     chosenCategories.forEach {category->
-                        Button(modifier = Modifier.padding(start = 4.dp), shape = RoundedCornerShape(10.dp), onClick = { /*TODO*/ }) {
+                        Button(modifier = Modifier.padding(start = 4.dp), shape = RoundedCornerShape(10.dp), onClick = {  }) {
                             Text(
                                 text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
                                 fontSize = 10.sp,
