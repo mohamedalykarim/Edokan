@@ -99,7 +99,7 @@ class MainViewModel @Inject constructor(
     val cityId: Flow<Int?> = userPreferencesRepository.cityIdFlow
     val city: Flow<String?> = userPreferencesRepository.cityFlow
 
-    val selectedMarketPlaceId: Flow<String?> = userSelectionPreferencesRepository.selectedMarketplaceIdFlow
+    val selectedMarketPlaceId: Flow<Int?> = userSelectionPreferencesRepository.selectedMarketplaceIdFlow
     val selectedMarketPlaceName: Flow<String?> = userSelectionPreferencesRepository.selectedMarketplaceNameFlow
 
     fun setHomePageState(state: String) {

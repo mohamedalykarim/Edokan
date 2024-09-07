@@ -36,6 +36,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -45,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -75,6 +77,11 @@ fun Step2(
     val productDescription by viewModel.productDescription.collectAsState()
     var productPrice by remember {mutableStateOf("")}
     var productQuantity by remember {mutableStateOf("")}
+
+    var isErrorProductName by rememberSaveable { mutableStateOf(false) }
+    var isErrorProductDescription by rememberSaveable { mutableStateOf(false) }
+    var isErrorProductPrice by rememberSaveable { mutableStateOf(false) }
+
 
     runBlocking(Dispatchers.IO) {
         if (viewModel.productPrice.value > 0.0){
@@ -113,75 +120,143 @@ fun Step2(
                     fontWeight = FontWeight.Bold
                 )
 
-                OutlinedTextField(
-                    value = productName,
-                    placeholder = {
-                        Text("Product Name", fontSize = 12.sp)
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color(parseColor("#CE0F1E")),
-                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
-                        errorLabelColor = Color(parseColor("#CE0F1E"))
-                    ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
-                    shape = RoundedCornerShape(32.dp),
-                    onValueChange = {
-                        viewModel.setProductName(it)
-                    })
+                Column {
+                    OutlinedTextField(
+                        value = productName,
+                        placeholder = {
+                            Text("Product Name", fontSize = 12.sp)
+                        },
+                        maxLines = 1,
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            fontSize = 12.sp
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            errorContainerColor = Color.White,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedLabelColor = Color(parseColor("#CE0F1E")),
+                            unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                            errorLabelColor = Color(parseColor("#CE0F1E"))
+                        ),
+                        modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                        shape = RoundedCornerShape(32.dp),
+                        onValueChange = {
+                            viewModel.setProductName(it)
+                            if (!it.isNullOrEmpty()){
+                                isErrorProductName = false
+                            }
+                        })
 
-                OutlinedTextField(
-                    value = productDescription,
-                    placeholder = {
-                        Text("Product Description", fontSize = 12.sp)
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color(parseColor("#CE0F1E")),
-                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
-                        errorLabelColor = Color(parseColor("#CE0F1E"))
-                    ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
-                    shape = RoundedCornerShape(32.dp),
-                    onValueChange = {
-                        viewModel.setProductDescription(it)
-                    })
+                    if (isErrorProductName) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 1.dp),
+                            text = "You must enter a product name",
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
 
-                OutlinedTextField(
-                    value = productPrice,
-                    placeholder = {
-                        Text("Product Price", fontSize = 12.sp)
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color(parseColor("#CE0F1E")),
-                        unfocusedLabelColor = Color(parseColor("#CE0F1E")),
-                        errorLabelColor = Color(parseColor("#CE0F1E"))
-                    ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
-                    shape = RoundedCornerShape(32.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                    ),
-                    maxLines = 1,
-                    onValueChange = {
-                        if (!it.equals("")){
-                            viewModel.setProductPrice(it.toDouble())
-                        }
-                        productPrice = it
-                    })
+                Column {
+                    OutlinedTextField(
+                        value = productDescription,
+                        placeholder = {
+                            Text("Product Description", fontSize = 12.sp)
+                        },
+                        maxLines = 1,
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            fontSize = 12.sp
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            errorContainerColor = Color.White,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedLabelColor = Color(parseColor("#CE0F1E")),
+                            unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                            errorLabelColor = Color(parseColor("#CE0F1E"))
+                        ),
+                        modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                        shape = RoundedCornerShape(32.dp),
+                        onValueChange = {
+                            viewModel.setProductDescription(it)
+                            if (!it.isNullOrEmpty()){
+                                isErrorProductDescription = false
+                            }
+                        })
+
+                    if (isErrorProductDescription) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 1.dp),
+                            text = "You must enter a product description",
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+
+                Column {
+                    OutlinedTextField(
+                        value = productPrice,
+                        placeholder = {
+                            Text("Product Price", fontSize = 12.sp)
+                        },
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            fontSize = 12.sp
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            errorContainerColor = Color.White,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedLabelColor = Color(parseColor("#CE0F1E")),
+                            unfocusedLabelColor = Color(parseColor("#CE0F1E")),
+                            errorLabelColor = Color(parseColor("#CE0F1E"))
+                        ),
+                        modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                        shape = RoundedCornerShape(32.dp),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                        ),
+                        maxLines = 1,
+                        onValueChange = {
+                            if (!it.equals("")){
+                                viewModel.setProductPrice(it.toDouble())
+                            }
+                            productPrice = it
+
+                            if (!it.isNullOrEmpty()){
+                                isErrorProductPrice = false
+                            }
+                        })
+                    if (isErrorProductPrice) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 1.dp),
+                            text = "Product price must be greater than 0",
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
 
                 OutlinedTextField(
                     value = productQuantity,
@@ -218,7 +293,22 @@ fun Step2(
                     border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
-                        viewModel.setCurrentStep(3)
+                        if(productName.isNullOrEmpty()){
+                            isErrorProductName = true
+                        }
+                        if(productDescription.isNullOrEmpty()){
+                            isErrorProductDescription = true
+                        }
+
+                        if(productPrice.isNullOrEmpty()){
+                            isErrorProductPrice = true
+                        }else if (productPrice.toDouble() == 0.0){
+                            isErrorProductPrice = true
+                        }
+
+                        if (!isErrorProductName && !isErrorProductDescription && !isErrorProductPrice){
+                            viewModel.setCurrentStep(3)
+                        }
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color(parseColor("#f6192a"),
                         ))

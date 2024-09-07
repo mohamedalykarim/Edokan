@@ -3,7 +3,6 @@ package com.mohalim.edokan.ui.main
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,21 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddBusiness
 import androidx.compose.material.icons.filled.AddShoppingCart
-import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ContentPasteSearch
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Shop
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Store
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
@@ -47,13 +38,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -75,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -84,22 +70,14 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.R
-import com.mohalim.edokan.core.datasource.preferences.UserPreferencesRepository
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.AuthUtils
 import com.mohalim.edokan.core.utils.SealedSellerScreen
 import com.mohalim.edokan.ui.seller.SellerAddMarketplaceActivity
 import com.mohalim.edokan.ui.seller.SellerAddProductActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-
 
 @Composable
 fun SellerMainUI(context: Context, viewModel: MainViewModel) {
@@ -184,7 +162,7 @@ fun SellerHomeScreen(context: Context, viewModel: MainViewModel, username: Strin
 
                 ) {
 
-            if (selectedMarketplaceId.isNullOrEmpty()) {
+            if (selectedMarketplaceId == 0 || selectedMarketplaceId == null) {
                 /**
                  * No selected Marketplace so show lazy column
                  */
@@ -419,7 +397,7 @@ fun ProductItem(product: Product) {
             Image(
                 painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
-                    .data(product.productImage)
+                    .data(product.productImageUrl)
                     .size(Size.ORIGINAL)
                     .build()
                 ),
@@ -535,9 +513,9 @@ fun BottomNavigationBar(navController: NavController, viewModel: MainViewModel) 
                 selected = currentRoute == screen.route,
                 onClick = {
                     if (currentRoute != screen.route) {
-                        if(screen.route == SealedSellerScreen.Products.route && selectedMarketplaceId.isNullOrEmpty()){
+                        if(screen.route == SealedSellerScreen.Products.route && (selectedMarketplaceId == 0 || selectedMarketplaceId == null)){
                             showDialog = true
-                        }else if(screen.route == SealedSellerScreen.Orders.route && selectedMarketplaceId.isNullOrEmpty()){
+                        }else if(screen.route == SealedSellerScreen.Orders.route && (selectedMarketplaceId == 0 || selectedMarketplaceId == null)){
                             showDialog = true
                         } else{
                             navController.navigate(screen.route) {

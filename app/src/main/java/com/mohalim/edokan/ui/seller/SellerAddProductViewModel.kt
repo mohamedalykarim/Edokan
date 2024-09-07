@@ -1,37 +1,23 @@
 package com.mohalim.edokan.ui.seller
 
-import android.content.ClipDescription
-import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.util.UUID
 import javax.inject.Inject
 
-import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.mohalim.edokan.core.datasource.preferences.UserSelectionPreferencesRepository
 import com.mohalim.edokan.core.model.Category
 import com.mohalim.edokan.core.utils.Resource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import okhttp3.internal.wait
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class SellerAddProductViewModel @Inject constructor(
@@ -106,24 +92,6 @@ class SellerAddProductViewModel @Inject constructor(
 
     private val _currentStep = MutableStateFlow(1)
     val currentStep: MutableStateFlow<Int> = _currentStep
-
-    var selectedMarketplaceId = ""
-    var selectedMarketplaceName = ""
-    var selectedMarketplaceLat = 0.0
-    var selectedMarketplaceLng = 0.0
-
-    init {
-        viewModelScope.launch {
-            selectedMarketplaceId =
-                userSelectionPreferencesRepository.getSelectedMarketplaceId() ?: ""
-            selectedMarketplaceName =
-                userSelectionPreferencesRepository.getSelectedMarketplaceName() ?: ""
-            selectedMarketplaceLat =
-                userSelectionPreferencesRepository.getSelectedMarketplaceLat() ?: 0.0
-            selectedMarketplaceLng =
-                userSelectionPreferencesRepository.getSelectedMarketplaceLng() ?: 0.0
-        }
-    }
 
     private val _formState = MutableStateFlow(Product())
     val formState: StateFlow<Product> = _formState
@@ -220,38 +188,6 @@ class SellerAddProductViewModel @Inject constructor(
         _formState.value = update(_formState.value)
     }
 
-    fun addProduct() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val formState = _formState.value
-            Log.d("TAG", "addProduct: before 0")
-
-
-            Log.d("TAG", "addProduct: before 1 ")
-
-            val product = Product(
-                productName = formState.productName,
-                productDescription = formState.productDescription,
-                productPrice = formState.productPrice,
-                productDiscount = formState.productDiscount,
-                marketPlaceId = selectedMarketplaceId ?: "",
-                marketPlaceName = selectedMarketplaceName ?: "",
-                marketPlaceLat = selectedMarketplaceLat ?: 0.0,
-                marketPlaceLng = selectedMarketplaceLng ?: 0.0,
-                productQuantity = formState.productQuantity,
-                dateAdded = System.currentTimeMillis().toDouble(),
-                dateModified = System.currentTimeMillis().toDouble()
-            )
-
-            Log.d("TAG", "addProduct: before2 ")
-
-
-            sellerRepository.addProduct(product).collect {
-                Log.d("TAG", "addProduct: " + it)
-            }
-
-        }
-    }
-
     fun searchForCategories(categoryName: String) {
         Log.d("TAG", "categoryName "+ categoryName)
         firebaseAuth.currentUser?.getIdToken(true)?.addOnSuccessListener {
@@ -282,6 +218,65 @@ class SellerAddProductViewModel @Inject constructor(
         }
     }
 }
+
+    fun addNewProduct() {
+
+        firebaseAuth.currentUser?.getIdToken(true)?.addOnSuccessListener {
+            viewModelScope.launch {
+                val marketplaceId = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceId() }
+                val marketplaceName = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceName() }
+                val marketplaceLat = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceLat() }
+                val marketplaceLng = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceLng() }
+
+                Log.d("TAG", "addNewProduct: " + marketplaceId)
+                Log.d("TAG", "addNewProduct: " + marketplaceName)
+                Log.d("TAG", "addNewProduct: " + marketplaceLat)
+                Log.d("TAG", "addNewProduct: " + marketplaceLng)
+
+                val product = Product(
+                    productName = productName.value,
+                    productDescription = productDescription.value,
+                    productImageUrl = imageUri.value.toString(),
+                    productImage1Url = image1Uri.value.toString(),
+                    productImage2Url = image2Uri.value.toString(),
+                    productImage3Url = image3Uri.value.toString(),
+                    productImage4Url = image4Uri.value.toString(),
+                    productPrice = productPrice.value,
+                    productDiscount = productDiscount.value,
+                    productWeight = productWeight.value,
+                    productLength = productLength.value,
+                    productWidth = productWidth.value,
+                    productHeight = productHeight.value,
+                    marketPlaceId = marketplaceId ?:0,
+                    marketPlaceName = marketplaceName ?:"",
+                    marketPlaceLat = marketplaceLat ?:0.0,
+                    marketPlaceLng = marketplaceLng ?:0.0,
+                    productQuantity = productQuantity.value,
+                    dateAdded = System.currentTimeMillis().toDouble(),
+                    dateModified = System.currentTimeMillis().toDouble(),
+                )
+
+                sellerRepository.addProduct(it.token.toString(), product).collect{
+                    when(it) {
+                        is Resource.Loading -> {
+                        }
+
+                        is Resource.Success -> {
+                            Log.d("TAG", "addNewProduct: Success")
+                        }
+
+                        is Resource.Error -> {
+                            Log.d("TAG", "addNewProduct: Error")
+                        }
+                    }
+                }
+
+
+
+
+            }
+        }
+    }
 
 }
 

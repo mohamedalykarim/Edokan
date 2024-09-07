@@ -35,11 +35,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +70,9 @@ fun Step1(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+
+        var isError by rememberSaveable { mutableStateOf(false) }
+
 
         val holderUri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
@@ -118,6 +125,8 @@ fun Step1(
                                 .createIntent {
                                     startForProfileImageResult.launch(it)
                                 }
+
+                            isError = false
                         }, colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = Color(parseColor("#f9f9f9"),
                             ))
@@ -153,6 +162,8 @@ fun Step1(
                                 .createIntent {
                                     startForProfileImageResult.launch(it)
                                 }
+                            isError = false
+
                         }, colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = Color(parseColor("#f9f9f9"),
                             ))
@@ -184,9 +195,20 @@ fun Step1(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(200.dp)
                         .padding(16.dp)
                 )
+
+                if (isError) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 1.dp),
+                        text = "You Should select an thumbnail image for your product.",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -197,7 +219,11 @@ fun Step1(
                     border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
-                        viewModel.setCurrentStep(2)
+                        if (viewModel.imageUri.value.toString() == holderUri.toString()){
+                            isError = true
+                        }else{
+                            viewModel.setCurrentStep(2)
+                        }
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color(parseColor("#f6192a"),
                         ))

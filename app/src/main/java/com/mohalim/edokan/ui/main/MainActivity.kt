@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                     val cityId = viewModel.cityId.first()
                     val selectedMarketPlace = viewModel.selectedMarketPlaceId.first()
 
-                    if (selectedMarketPlace.isNullOrEmpty()) {
+                    if (selectedMarketPlace == 0 || selectedMarketPlace == null) {
                         viewModel.fetchApprovedMarketPlaces(cityId ?: 0)
                     }
                 }

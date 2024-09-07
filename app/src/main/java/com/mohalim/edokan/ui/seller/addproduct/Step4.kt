@@ -81,7 +81,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mohalim.edokan.R
 import com.mohalim.edokan.core.model.Category
+import com.mohalim.edokan.ui.main.DialogWithImage
 import com.mohalim.edokan.ui.seller.SellerAddProductViewModel
 import kotlinx.coroutines.flow.filter
 import java.util.Calendar
@@ -95,6 +97,7 @@ fun Step4(
     startForProfileImageResult: ActivityResultLauncher<Intent>,
 ) {
     val chosenCategories by viewModel.chosenCategories.collectAsState()
+    var showError by remember{ mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -175,7 +178,7 @@ fun Step4(
                         }
                     }
                 }
-                
+
 
 
                 Button(
@@ -185,7 +188,13 @@ fun Step4(
                     border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
-                        viewModel.setCurrentStep(5)
+                        if(viewModel.chosenCategories.value.isEmpty()){
+                            showError = true
+                            return@Button
+                        }else{
+                            viewModel.setCurrentStep(5)
+                        }
+
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color(parseColor("#f6192a"),
                         ))
@@ -206,6 +215,15 @@ fun Step4(
                 }
             }
         }
+
+        DialogWithImage(
+            showDialog = showError,
+            onDismissRequest = { showError = !showError },
+            onConfirmation = { showError = !showError },
+            painter = painterResource(id = R.drawable.error_icon) ,
+            imageDescription = "Error",
+            dialogText = "You should choose one category at least"
+        )
     }
 }
 

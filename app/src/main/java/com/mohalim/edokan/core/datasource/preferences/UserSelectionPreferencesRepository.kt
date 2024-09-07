@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 
@@ -15,13 +16,13 @@ class UserSelectionPreferencesRepository(private val context: Context) {
 
     // Keys for storing data
     companion object {
-        val SELECTED_MARKETPLACE_ID = stringPreferencesKey("selected_marketplace_ID")
+        val SELECTED_MARKETPLACE_ID = intPreferencesKey("selected_marketplace_Id")
         val SELECTED_MARKETPLACE_NAME = stringPreferencesKey("selected_marketplace_name")
         val SELECTED_MARKETPLACE_LAT = doublePreferencesKey("selected_marketplace_lat")
         val SELECTED_MARKETPLACE_LNG = doublePreferencesKey("selected_marketplace_lng")
     }
 
-    suspend fun saveSelectedMarketplaceData(selectedMarketplaceId: String, selectedMarketplaceName: String, selectedMarketplaceLat: Double, selectedMarketplaceLng: Double){
+    suspend fun saveSelectedMarketplaceData(selectedMarketplaceId: Int, selectedMarketplaceName: String, selectedMarketplaceLat: Double, selectedMarketplaceLng: Double){
         context.dataStore.edit {
             it[SELECTED_MARKETPLACE_ID] = selectedMarketplaceId
             it[SELECTED_MARKETPLACE_NAME] = selectedMarketplaceName
@@ -31,21 +32,21 @@ class UserSelectionPreferencesRepository(private val context: Context) {
     }
 
     // set Selected Marketplace Id
-    suspend fun setSelectedMarketplaceId(selectedMarketplaceId: String) {
+    suspend fun setSelectedMarketplaceId(selectedMarketplaceId: Int) {
         context.dataStore.edit { preferences ->
             preferences[SELECTED_MARKETPLACE_ID] = selectedMarketplaceId
         }
     }
 
-    val selectedMarketplaceIdFlow: Flow<String?> = context.dataStore.data
+    val selectedMarketplaceIdFlow: Flow<Int?> = context.dataStore.data
         .map { preferences ->
             preferences[SELECTED_MARKETPLACE_ID]
         }
 
-    suspend fun getSelectedMarketplaceId(): String? {
-        val marketPlaceId: String? = context.dataStore.data
+    suspend fun getSelectedMarketplaceId(): Int? {
+        val marketPlaceId: Int? = context.dataStore.data
             .map { preferences -> preferences[SELECTED_MARKETPLACE_ID] }
-            .single()
+            .first()
 
         return marketPlaceId
     }
@@ -67,7 +68,7 @@ class UserSelectionPreferencesRepository(private val context: Context) {
     suspend fun getSelectedMarketplaceName(): String? {
         val marketPlace: String? = context.dataStore.data
             .map { preferences -> preferences[SELECTED_MARKETPLACE_NAME] }
-            .single()
+            .first()
 
         return marketPlace
     }
@@ -87,7 +88,7 @@ class UserSelectionPreferencesRepository(private val context: Context) {
     suspend fun getSelectedMarketplaceLat(): Double? {
         val marketPlaceLat: Double? = context.dataStore.data
             .map { preferences -> preferences[SELECTED_MARKETPLACE_LAT] }
-            .single()
+            .first()
 
         return marketPlaceLat
     }
@@ -107,13 +108,13 @@ class UserSelectionPreferencesRepository(private val context: Context) {
     suspend fun getSelectedMarketplaceLng(): Double? {
         val marketPlaceLng: Double? = context.dataStore.data
             .map { preferences -> preferences[SELECTED_MARKETPLACE_LNG] }
-            .single()
+            .first()
 
         return marketPlaceLng
     }
 
     suspend fun clearSelectedMarketplace() {
-        saveSelectedMarketplaceData("", "", 0.0, 0.0)
+        saveSelectedMarketplaceData(0, "", 0.0, 0.0)
     }
 
 

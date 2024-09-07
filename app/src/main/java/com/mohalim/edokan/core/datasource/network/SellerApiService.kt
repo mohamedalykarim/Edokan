@@ -1,9 +1,9 @@
 package com.mohalim.edokan.core.datasource.network
 
 import com.mohalim.edokan.core.model.MarketPlace
-import com.mohalim.edokan.core.model.network.AddMarketplaceResponse
+import com.mohalim.edokan.core.model.network.AddProductRequest
+import com.mohalim.edokan.core.model.network.AddResponse
 import com.mohalim.edokan.core.model.network.MarketplacesResponse
-import com.mohalim.edokan.core.model.network.ProductByOwnerRequest
 import com.mohalim.edokan.core.model.network.UserResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -32,10 +32,11 @@ interface SellerApiService{
     suspend fun addMarketplace(
         @Header("Authorization") token: String,
         @Body data: MarketPlace
-    ): Response<AddMarketplaceResponse>
+    ): Response<AddResponse>
 
-    suspend fun getProducts(
+    @POST("/Development/Product/add-new-product")
+    suspend fun addProduct(
         @Header("Authorization") token: String,
-        @Body productRequest: ProductByOwnerRequest
-    )
+        @Body data: AddProductRequest
+    ): Response<AddResponse>
 }

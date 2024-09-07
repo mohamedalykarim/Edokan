@@ -1,5 +1,6 @@
 package com.mohalim.edokan.core.datasource.repository
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mohalim.edokan.core.datasource.network.CategoryApiService
@@ -7,11 +8,13 @@ import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.Category
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
+import com.mohalim.edokan.core.model.network.AddProductRequest
 import com.mohalim.edokan.core.model.network.ProductByOwnerRequest
 import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
@@ -105,26 +108,43 @@ class SellerRepository @Inject constructor(
         emit(Resource.Loading())
         try {
             val productRequest = ProductByOwnerRequest(searchQuery, limit, marketplaceOwnerId)
-            sellerApiService.getProducts(token, productRequest)
+            //sellerApiService.getProducts(token, productRequest)
         }catch (e : Exception){
             emit(Resource.Error(e.message.toString()))
         }
     }.flowOn(Dispatchers.IO)
 
-    fun addProduct(product: Product): Flow<Resource<out Boolean>> = flow {
+
+    fun addProduct(token: String, product: Product): Flow<Resource<out Boolean>> = flow {
         emit(Resource.Loading())
-
         try {
-            // Create a new document reference without specifying a document ID
-            val documentRef = firestore.collection("Products").document()
+            val addProductRequest = AddProductRequest(
+                productName = product.productName,
+                productDescription = product.productDescription,
+                productPrice = product.productPrice,
+                productQuantity = product.productQuantity,
+                productWidth = product.productWidth,
+                productHeight = product.productHeight,
+                productWeight = product.productWeight,
+                productLength = product.productLength,
+                productDiscount = product.productDiscount,
+                marketplaceId = product.marketPlaceId,
+                marketplaceName = product.marketPlaceName,
+                marketplaceLat = product.marketPlaceLat,
+                marketplaceLng = product.marketPlaceLng,
+                dateAdded = product.dateAdded,
+                dateModifier = product.dateModified
+            )
+            val response = sellerApiService.addProduct(token, addProductRequest)
+            if (response.isSuccessful) {
+                Log.d("TAG", "addProduct: Success")
+                emit(Resource.Success(true))
+            } else {
+                val errorBody = response.errorBody()?.string()
+                Log.d("TAG", "addProduct errorBody: " + errorBody)
+                emit(Resource.Error(errorBody.toString()))
+            }
 
-            // Set the productId to the document ID
-            val productWithId = product.copy(productId = documentRef.id)
-
-            // Add the product to Firestore with the generated productId
-            documentRef.set(productWithId).await()
-
-            emit(Resource.Success(true))
         } catch (e: Exception) {
             Log.d("TAG", "addProduct: " + e.message)
             emit(Resource.Error(e.localizedMessage ?: "Unknown Error", false))

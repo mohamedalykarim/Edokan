@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -105,8 +106,12 @@ fun Step5(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .scrollable(orientation = Orientation.Vertical, state = scrollState)
+            .verticalScroll(state = scrollState)
     ) {
+
+        /**
+         * Basics Card
+         */
 
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
@@ -123,43 +128,39 @@ fun Step5(
             ) {
 
                 Text(
-                    text = "Basics",
+                    text = "Basics: ",
                     modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Product Name: ",
-                        modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Text(
+                    text = "Product Name: ",
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-                    Text(
-                        text = productName  ,
-                        modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
+                Text(
+                    text = productName  ,
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 4.dp),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Normal
+                )
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Product Description: ",
-                        modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Text(
+                    text = "Product Description: ",
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-                    Text(
-                        text = productDescription ,
-                        modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
+                Text(
+                    text = productDescription ,
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 4.dp),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Normal
+                )
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -199,6 +200,9 @@ fun Step5(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        /**
+         * Details Card
+         */
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
@@ -214,7 +218,7 @@ fun Step5(
             ) {
 
                 Text(
-                    text = "Details",
+                    text = "Details: ",
                     modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -305,7 +309,9 @@ fun Step5(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        /**
+         * Categories Card
+         */
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
@@ -320,6 +326,16 @@ fun Step5(
                     .padding(16.dp),
             ) {
 
+                Text(
+                    text = "Selected Categories: ",
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
                 FlowRow() {
                     chosenCategories.forEach {category->
                         Button(
@@ -330,21 +346,13 @@ fun Step5(
                             colors = ButtonDefaults.outlinedButtonColors(
                                 containerColor = Color(parseColor("#f6192a"),
                                 )),
-                            onClick = {
+                            onClick = {}) {
 
-                            }) {
-
-                            Row(modifier = Modifier.height(40.dp)) {
-
-                                Text(
-                                    text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
-                                    fontSize = 9.sp,
-                                    color = Color.White,
-                                    modifier = Modifier.clickable {
-                                        viewModel.removeFromChosenCategories(category)
-                                    })
-
-                            }
+                            Text(
+                                text = if (Locale.getDefault().language.equals("en")) category.categoryName else category.categoryNameAr,
+                                fontSize = 9.sp,
+                                color = Color.White
+                            )
 
 
 
@@ -371,20 +379,25 @@ fun Step5(
                     .padding(16.dp),
             ) {
 
-                Column {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUri)
-                            .size(Size.ORIGINAL)
-                            .build(),
-                        placeholder = painterResource(id = R.drawable.image_placeholder),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .padding(16.dp)
-                    )
-                }
+                Text(
+                    text = "Images",
+                    modifier = Modifier.padding(start = 0.dp, end = 16.dp, top = 16.dp),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUri)
+                        .size(Size.ORIGINAL)
+                        .build(),
+                    placeholder = painterResource(id = R.drawable.image_placeholder),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp)
+                )
 
                 Row {
                     AsyncImage(
@@ -413,6 +426,9 @@ fun Step5(
                             .height(100.dp)
                             .padding(16.dp)
                     )
+                }
+
+                Row {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(image3Uri)
@@ -442,6 +458,40 @@ fun Step5(
                 }
 
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 4.dp),
+            border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
+            shape = RoundedCornerShape(10.dp),
+            onClick = {
+                viewModel.addNewProduct()
+            }, colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color(parseColor("#f6192a"),
+                ))
+        ) {
+            Row {
+                Text(
+                    text = "Add New Product",
+                    modifier = Modifier.padding(top = 3.dp),
+                    fontSize = 12.sp,
+                    color = Color(parseColor("#f9f9f9"))
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    Icons.Default.ChevronRight,
+                    modifier = Modifier.size(30.dp),
+                    tint = Color(parseColor("#f9f9f9")),
+                    contentDescription = "Gallery"
+                )
+
+            }
+
         }
 
     }
