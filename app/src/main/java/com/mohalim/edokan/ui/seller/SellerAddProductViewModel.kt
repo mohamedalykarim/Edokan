@@ -229,19 +229,14 @@ class SellerAddProductViewModel @Inject constructor(
                 val marketplaceLat = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceLat() }
                 val marketplaceLng = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceLng() }
 
-                Log.d("TAG", "addNewProduct: " + marketplaceId)
-                Log.d("TAG", "addNewProduct: " + marketplaceName)
-                Log.d("TAG", "addNewProduct: " + marketplaceLat)
-                Log.d("TAG", "addNewProduct: " + marketplaceLng)
-
                 val product = Product(
                     productName = productName.value,
                     productDescription = productDescription.value,
-                    productImageUrl = imageUri.value.toString(),
-                    productImage1Url = image1Uri.value.toString(),
-                    productImage2Url = image2Uri.value.toString(),
-                    productImage3Url = image3Uri.value.toString(),
-                    productImage4Url = image4Uri.value.toString(),
+                    productImageUrl = imageUri.value.path.toString(),
+                    productImage1Url = image1Uri.value.path.toString(),
+                    productImage2Url = image2Uri.value.path.toString(),
+                    productImage3Url = image3Uri.value.path.toString(),
+                    productImage4Url = image4Uri.value.path.toString(),
                     productPrice = productPrice.value,
                     productDiscount = productDiscount.value,
                     productWeight = productWeight.value,
