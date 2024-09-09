@@ -1,5 +1,6 @@
 package com.mohalim.edokan.ui.seller
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -219,7 +220,7 @@ class SellerAddProductViewModel @Inject constructor(
     }
 }
 
-    fun addNewProduct() {
+    fun addNewProduct(context: Context) {
 
         firebaseAuth.currentUser?.getIdToken(true)?.addOnSuccessListener {
             viewModelScope.launch {
@@ -256,7 +257,7 @@ class SellerAddProductViewModel @Inject constructor(
                     dateModified = System.currentTimeMillis().toDouble(),
                 )
 
-                sellerRepository.addProduct(it.token.toString(), product).collect{
+                sellerRepository.addProduct(context, it.token.toString(), product).collect{
                     when(it) {
                         is Resource.Loading -> {
                         }

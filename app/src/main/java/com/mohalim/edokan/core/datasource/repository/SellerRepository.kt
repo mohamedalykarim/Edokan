@@ -1,8 +1,11 @@
 package com.mohalim.edokan.core.datasource.repository
 
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mohalim.edokan.R
 import com.mohalim.edokan.core.datasource.network.CategoryApiService
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.Category
@@ -18,6 +21,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 class SellerRepository @Inject constructor(
     val firestore : FirebaseFirestore,
@@ -115,7 +123,7 @@ class SellerRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
 
-    fun addProduct(token: String, product: Product): Flow<Resource<out Boolean>> = flow {
+    fun addProduct(context: Context, token: String, product: Product): Flow<Resource<out Boolean>> = flow {
         emit(Resource.Loading())
         try {
             val addProductRequest = AddProductRequest(
@@ -135,9 +143,28 @@ class SellerRepository @Inject constructor(
                 dateAdded = product.dateAdded,
                 dateModifier = product.dateModified
             )
-            val response = sellerApiService.addProduct(token, addProductRequest)
+
+            val holderUri = Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(context.resources.getResourcePackageName(R.drawable.image_placeholder))
+                .appendPath(context.resources.getResourceTypeName(R.drawable.image_placeholder))
+                .appendPath(context.resources.getResourceEntryName(R.drawable.image_placeholder))
+                .build()
+
+
+            val imagePaths = listOf(product.productImageUrl, product.productImage1Url, product.productImage2Url, product.productImage3Url,product.productImage4Url)
+
+            // Create MultipartBody.Part for each file
+            val fileParts = imagePaths.map { imagePath ->
+                val file = File(imagePath)
+                val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("files", file.name, requestFile)
+            }
+
+            val response = sellerApiService.addProduct(token, addProductRequest, fileParts)
             if (response.isSuccessful) {
                 Log.d("TAG", "addProduct: Success")
+
                 emit(Resource.Success(true))
             } else {
                 val errorBody = response.errorBody()?.string()

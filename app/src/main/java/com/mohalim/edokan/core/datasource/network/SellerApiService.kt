@@ -5,11 +5,15 @@ import com.mohalim.edokan.core.model.network.AddProductRequest
 import com.mohalim.edokan.core.model.network.AddResponse
 import com.mohalim.edokan.core.model.network.MarketplacesResponse
 import com.mohalim.edokan.core.model.network.UserResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface SellerApiService{
@@ -34,9 +38,13 @@ interface SellerApiService{
         @Body data: MarketPlace
     ): Response<AddResponse>
 
+    @Multipart
     @POST("/Development/Product/add-new-product")
     suspend fun addProduct(
         @Header("Authorization") token: String,
-        @Body data: AddProductRequest
+        @Body data: AddProductRequest,
+        @Part files: List<MultipartBody.Part>
     ): Response<AddResponse>
+
+
 }

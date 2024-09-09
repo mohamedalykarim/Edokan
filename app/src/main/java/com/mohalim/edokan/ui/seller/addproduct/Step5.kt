@@ -470,7 +470,7 @@ fun Step5(
             border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
             shape = RoundedCornerShape(10.dp),
             onClick = {
-                viewModel.addNewProduct()
+                viewModel.addNewProduct(context)
             }, colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = Color(parseColor("#f6192a"),
                 ))
