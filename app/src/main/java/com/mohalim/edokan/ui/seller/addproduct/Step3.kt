@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -49,10 +50,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +92,13 @@ fun Step3(
     val image2Uri by viewModel.image2Uri.collectAsState(holderUri)
     val image3Uri by viewModel.image3Uri.collectAsState(holderUri)
     val image4Uri by viewModel.image4Uri.collectAsState(holderUri)
+
+    val focusRequesterWidth = remember { FocusRequester() }
+    val focusRequesterHeight = remember { FocusRequester() }
+    val focusRequesterWeight = remember { FocusRequester() }
+    val focusRequesterLength = remember { FocusRequester() }
+    val focusRequesterDiscount = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
 
     Column(
@@ -131,15 +143,23 @@ fun Step3(
                         unfocusedLabelColor = Color(parseColor("#CE0F1E")),
                         errorLabelColor = Color(parseColor("#CE0F1E"))
                     ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    modifier = Modifier
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp))
+                        .focusRequester(focusRequesterWidth),
                     shape = RoundedCornerShape(32.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                     onValueChange = {
                         if (!it.equals("")){
                             viewModel.setProductWidth(it.toDouble())
                         }
                         productWidth = it
-
-                    })
+                    }, keyboardActions = KeyboardActions(
+                        onNext = {focusRequesterHeight.requestFocus()}
+                    )
+                )
 
                 OutlinedTextField(
                     value = productHeight,
@@ -156,14 +176,23 @@ fun Step3(
                         unfocusedLabelColor = Color(parseColor("#CE0F1E")),
                         errorLabelColor = Color(parseColor("#CE0F1E"))
                     ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    modifier = Modifier
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp))
+                        .focusRequester(focusRequesterHeight),
                     shape = RoundedCornerShape(32.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                     onValueChange = {
                         if (!it.equals("")) {
                             viewModel.setProductHeight(it.toDouble())
                         }
                         productHeight = it
-                    })
+                    },
+                    keyboardActions = KeyboardActions(
+                        onNext = {focusRequesterWeight.requestFocus()}
+                    ))
 
                 OutlinedTextField(
                     value = productWeight,
@@ -180,10 +209,13 @@ fun Step3(
                         unfocusedLabelColor = Color(parseColor("#CE0F1E")),
                         errorLabelColor = Color(parseColor("#CE0F1E"))
                     ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    modifier = Modifier
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp))
+                        .focusRequester(focusRequesterWeight),
                     shape = RoundedCornerShape(32.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
                     ),
                     maxLines = 1,
                     onValueChange = {
@@ -191,7 +223,10 @@ fun Step3(
                             viewModel.setProductWeight(it.toDouble())
                         }
                         productWeight = it
-                    })
+                    },
+                    keyboardActions = KeyboardActions(
+                        onNext = {focusRequesterLength.requestFocus()}
+                    ))
 
                 OutlinedTextField(
                     value = productLength,
@@ -208,10 +243,13 @@ fun Step3(
                         unfocusedLabelColor = Color(parseColor("#CE0F1E")),
                         errorLabelColor = Color(parseColor("#CE0F1E"))
                     ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    modifier = Modifier
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp))
+                        .focusRequester(focusRequesterLength),
                     shape = RoundedCornerShape(32.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
                     ),
                     maxLines = 1,
                     onValueChange = {
@@ -219,7 +257,10 @@ fun Step3(
                             viewModel.setProductLength(it.toDouble())
                         }
                         productLength = it
-                    })
+                    },
+                    keyboardActions = KeyboardActions(
+                        onNext = {focusRequesterDiscount.requestFocus()}
+                    ))
 
                 OutlinedTextField(
                     value = productDiscount,
@@ -236,10 +277,13 @@ fun Step3(
                         unfocusedLabelColor = Color(parseColor("#CE0F1E")),
                         errorLabelColor = Color(parseColor("#CE0F1E"))
                     ),
-                    modifier = Modifier.shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp)),
+                    modifier = Modifier
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(32.dp))
+                        .focusRequester(focusRequesterDiscount),
                     shape = RoundedCornerShape(32.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
                     ),
                     maxLines = 1,
                     onValueChange = {
@@ -247,7 +291,10 @@ fun Step3(
                             viewModel.setProductDiscount(it.toDouble())
                         }
                         productDiscount = it
-                    })
+                    },
+                    keyboardActions = KeyboardActions(
+                        onDone = {focusManager.clearFocus()}
+                    ))
 
                 Row {
                     AsyncImage(

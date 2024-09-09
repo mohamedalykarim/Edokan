@@ -33,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChevronRight
@@ -484,7 +485,7 @@ fun Step5(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
-                    Icons.Default.ChevronRight,
+                    Icons.Default.Add,
                     modifier = Modifier.size(30.dp),
                     tint = Color(parseColor("#f9f9f9")),
                     contentDescription = "Gallery"
