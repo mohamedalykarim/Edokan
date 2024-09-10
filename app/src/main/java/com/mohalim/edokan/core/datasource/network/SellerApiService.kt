@@ -42,7 +42,21 @@ interface SellerApiService{
     @POST("/Development/Product/add-new-product")
     suspend fun addProduct(
         @Header("Authorization") token: String,
-        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,  // Use PartMap for form data
+        @Part("product_name") productName :String,
+        @Part("product_description") productDescription : String,
+        @Part("product_price") productPrices : Double,
+        @Part("product_quantity") productQuantity : Double,
+        @Part("product_width") productWidth : Double,
+        @Part("product_height") productHeight : Double,
+        @Part("product_weight") productWeight : Double,
+        @Part("product_length") productLength : Double,
+        @Part("product_discount") productDiscount : Double,
+        @Part("marketplace_id") marketplaceId : Int,
+        @Part("marketplace_name") marketplaceName : String,
+        @Part("marketplace_lat") marketplaceLat : Double,
+        @Part("marketplace_lng") marketplaceLng : Double,
+        @Part("date_added") dateAdded : Double,
+        @Part("date_modified") dateModified : Double,
         @Part files: List<MultipartBody.Part>
     ): Response<AddResponse>
 

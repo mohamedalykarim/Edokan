@@ -29,6 +29,12 @@ class SellerAddProductViewModel @Inject constructor(
 
     var savedTime = 0L
 
+    private val _showAddedDialog = MutableStateFlow(false)
+    val showAddedDialog : StateFlow<Boolean> = _showAddedDialog
+
+    private val _isloading = MutableStateFlow(false)
+    val isloading : StateFlow<Boolean> = _isloading
+
     private val _imageProcess = MutableStateFlow<String>("THUMBNAIL")
     val imageProcess: MutableStateFlow<String> = _imageProcess
 
@@ -96,6 +102,17 @@ class SellerAddProductViewModel @Inject constructor(
 
     private val _formState = MutableStateFlow(Product())
     val formState: StateFlow<Product> = _formState
+
+    fun setShowAddedDialog(showAddedDialog: Boolean){
+        _showAddedDialog.value = showAddedDialog
+    }
+
+    fun setIsLoading(isLoading: Boolean){
+        _isloading.value = isLoading
+    }
+
+
+
 
     fun setCurrentStep(step: Int) {
         _currentStep.value = step
@@ -258,6 +275,8 @@ class SellerAddProductViewModel @Inject constructor(
                         }
 
                         is Resource.Success -> {
+                            setIsLoading(false)
+                            setShowAddedDialog(true)
                             Log.d("TAG", "addNewProduct: Success")
                         }
 

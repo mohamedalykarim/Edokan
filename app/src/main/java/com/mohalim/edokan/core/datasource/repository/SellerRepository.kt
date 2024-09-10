@@ -125,50 +125,23 @@ class SellerRepository @Inject constructor(
     fun addProduct(context: Context, token: String, product: Product): Flow<Resource<out Boolean>> = flow {
         emit(Resource.Loading())
         try {
-            val dataMap = hashMapOf(
-                "product_name" to product.productName.toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_description" to product.productDescription.toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_price" to product.productPrice.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_quantity" to product.productQuantity.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_width" to product.productWidth.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_height" to product.productHeight.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_weight" to product.productWeight.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_length" to product.productLength.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "product_discount" to product.productDiscount.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "marketplace_id" to product.marketPlaceId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "marketplace_name" to product.marketPlaceName.toRequestBody("text/plain".toMediaTypeOrNull()),
-                "marketplace_lat" to product.marketPlaceLat.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "marketplace_lng" to product.marketPlaceLng.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "date_added" to product.dateAdded.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                "date_modified" to product.dateModified.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            )
-
-            val holderUri = Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(context.resources.getResourcePackageName(R.drawable.image_placeholder))
-                .appendPath(context.resources.getResourceTypeName(R.drawable.image_placeholder))
-                .appendPath(context.resources.getResourceEntryName(R.drawable.image_placeholder))
-                .build()
-
 
             val imagePaths : MutableList<String> = ArrayList()
             imagePaths.add(product.productImageUrl)
 
-            Log.d("TAG", "addProduct: "+ product.productImageUrl)
-
-            if (product.productImage1Url != holderUri.toString()){
+            if (product.productImage1Url != "/drawable/image_placeholder"){
                 imagePaths.add(product.productImage1Url)
             }
 
-            if (product.productImage2Url != holderUri.toString()){
+            if (product.productImage2Url != "/drawable/image_placeholder"){
                 imagePaths.add(product.productImage2Url)
             }
 
-            if (product.productImage3Url != holderUri.toString()){
+            if (product.productImage3Url != "/drawable/image_placeholder"){
                 imagePaths.add(product.productImage3Url)
             }
 
-            if (product.productImage4Url != holderUri.toString()){
+            if (product.productImage4Url != "/drawable/image_placeholder"){
                 imagePaths.add(product.productImage4Url)
             }
 
@@ -187,7 +160,24 @@ class SellerRepository @Inject constructor(
             }
 
 
-            val response = sellerApiService.addProduct(token, dataMap, fileParts)
+            val response = sellerApiService.addProduct(
+                token,
+                product.productName,
+                product.productDescription,
+                product.productPrice,
+                product.productQuantity,
+                product.productWidth,
+                product.productHeight,
+                product.productWeight,
+                product.productLength,
+                product.productDiscount,
+                product.marketPlaceId,
+                product.marketPlaceName,
+                product.marketPlaceLat,
+                product.marketPlaceLng,
+                product.dateAdded,
+                product.dateModified,
+                fileParts)
             if (response.isSuccessful) {
                 Log.d("TAG", "addProduct: Success")
 

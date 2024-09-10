@@ -108,7 +108,8 @@ fun Step3(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-    ) {
+            .verticalScroll(rememberScrollState())
+        ) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
@@ -121,8 +122,7 @@ fun Step3(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -131,6 +131,8 @@ fun Step3(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = productWidth,
@@ -165,6 +167,8 @@ fun Step3(
                     )
                 )
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = productHeight,
                     placeholder = {
@@ -197,6 +201,8 @@ fun Step3(
                     keyboardActions = KeyboardActions(
                         onNext = {focusRequesterWeight.requestFocus()}
                     ))
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = productWeight,
@@ -232,6 +238,9 @@ fun Step3(
                         onNext = {focusRequesterLength.requestFocus()}
                     ))
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+
                 OutlinedTextField(
                     value = productLength,
                     placeholder = {
@@ -266,6 +275,9 @@ fun Step3(
                         onNext = {focusRequesterDiscount.requestFocus()}
                     ))
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+
                 OutlinedTextField(
                     value = productDiscount,
                     placeholder = {
@@ -299,6 +311,9 @@ fun Step3(
                     keyboardActions = KeyboardActions(
                         onDone = {focusManager.clearFocus()}
                     ))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
 
                 Row {
                     AsyncImage(
@@ -403,33 +418,38 @@ fun Step3(
                     )
                 }
 
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 4.dp),
-                    border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
-                    shape = RoundedCornerShape(10.dp),
-                    onClick = {
-                        viewModel.setCurrentStep(4)
-                    }, colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color(parseColor("#f6192a"),
-                        ))
-                ) {
-                    Row {
-                        Text("Next Step", modifier = Modifier.padding(top = 3.dp), fontSize = 12.sp, color = Color(parseColor("#f9f9f9")))
-                        Spacer(modifier = Modifier.width(8.dp))
 
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            modifier = Modifier.size(30.dp),
-                            tint = Color(parseColor("#f9f9f9")),
-                            contentDescription = "Gallery"
-                        )
-
-                    }
-
-                }
             }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 4.dp),
+            border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
+            shape = RoundedCornerShape(10.dp),
+            onClick = {
+                viewModel.setCurrentStep(4)
+            }, colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color(parseColor("#f6192a"),
+                ))
+        ) {
+            Row {
+                Text("Next Step", modifier = Modifier.padding(top = 3.dp), fontSize = 12.sp, color = Color(parseColor("#f9f9f9")))
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    Icons.Default.ChevronRight,
+                    modifier = Modifier.size(30.dp),
+                    tint = Color(parseColor("#f9f9f9")),
+                    contentDescription = "Gallery"
+                )
+
+            }
+
         }
     }
 }

@@ -43,6 +43,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -64,6 +65,7 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.mohalim.edokan.R
+import com.mohalim.edokan.ui.main.DialogWithImage
 import com.mohalim.edokan.ui.seller.SellerAddProductViewModel
 import java.util.Locale
 
@@ -74,6 +76,8 @@ fun Step5(
     viewModel: SellerAddProductViewModel,
     startForProfileImageResult: ActivityResultLauncher<Intent>,
 ) {
+    val isLoading by viewModel.isloading.collectAsState()
+    val showAddedDialog by viewModel.showAddedDialog.collectAsState()
     val scrollState = rememberScrollState()
 
     val holderUri = Uri.Builder()
@@ -463,14 +467,31 @@ fun Step5(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (isLoading){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(modifier = Modifier.padding(50.dp).width(20.dp))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 4.dp),
             border= BorderStroke(1.dp, Color(parseColor("#f9f9f9"))),
             shape = RoundedCornerShape(10.dp),
+            enabled = !isLoading,
             onClick = {
-                viewModel.addNewProduct(context)
+                if (!isLoading){
+                    viewModel.addNewProduct(context)
+                    viewModel.setIsLoading(true)
+                }
+
             }, colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = Color(parseColor("#f6192a"),
                 ))
@@ -494,6 +515,15 @@ fun Step5(
             }
 
         }
+
+        DialogWithImage(
+            showDialog = showAddedDialog,
+            onDismissRequest = { (context as AppCompatActivity).finish() },
+            onConfirmation = { (context as AppCompatActivity).finish() },
+            painter = painterResource(id = R.drawable.added_successfully),
+            imageDescription = "Added",
+            dialogText = "Great!, Your product has been added successfully and waiting for admin approval"
+        )
 
     }
 }
