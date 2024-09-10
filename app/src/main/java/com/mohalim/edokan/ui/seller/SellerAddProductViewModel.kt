@@ -281,6 +281,7 @@ class SellerAddProductViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
+                            setIsLoading(false)
                             Log.d("TAG", "addNewProduct: Error")
                         }
                     }
