@@ -24,6 +24,8 @@ data class Product(
     val marketPlaceLng: Double = 0.0,
     val productQuantity: Double = 0.0,
     val productStatus: Int = 1,
+    val isGlobal: Int = 0,
+    val productOwnerId: String = "",
     val dateAdded: Double = 0.0,
     val dateModified: Double = 0.0,
 )

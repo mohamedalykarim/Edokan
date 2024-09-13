@@ -265,6 +265,7 @@ class SellerAddProductViewModel @Inject constructor(
                     marketPlaceLat = marketplaceLat ?:0.0,
                     marketPlaceLng = marketplaceLng ?:0.0,
                     productQuantity = productQuantity.value,
+                    productOwnerId = firebaseAuth.currentUser?.uid.toString(),
                     dateAdded = System.currentTimeMillis().toDouble(),
                     dateModified = System.currentTimeMillis().toDouble(),
                 )

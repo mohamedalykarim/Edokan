@@ -50,6 +50,7 @@ interface SellerApiService{
         @Part("marketplace_name") marketplaceName : String,
         @Part("marketplace_lat") marketplaceLat : Double,
         @Part("marketplace_lng") marketplaceLng : Double,
+        @Part("product_owner_id") productOwnerId : String,
         @Part("date_added") dateAdded : Double,
         @Part("date_modified") dateModified : Double,
         @Part files: List<MultipartBody.Part>

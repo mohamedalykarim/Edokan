@@ -175,6 +175,7 @@ class SellerRepository @Inject constructor(
                 product.marketPlaceName,
                 product.marketPlaceLat,
                 product.marketPlaceLng,
+                product.productOwnerId,
                 product.dateAdded,
                 product.dateModified,
                 fileParts)
@@ -184,7 +185,6 @@ class SellerRepository @Inject constructor(
                 emit(Resource.Success(true))
             } else {
                 val errorBody = response.errorBody()?.string()
-                Log.d("TAG", "addProduct errorBody: " + errorBody)
                 emit(Resource.Error(errorBody.toString()))
             }
 
