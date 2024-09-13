@@ -217,8 +217,9 @@ class MainViewModel @Inject constructor(
                         }
                         is Resource.Error->{
                             setShowLoading(false)
+                            Log.d("TAG", "checkIfUserDataIsExists: "+it.message)
 
-                            if (it.message == "User not found"){
+                            if (it.message == "Error: User not found"){
                                 val phoneNumber:String = firebaseAuth.currentUser?.phoneNumber.toString()
                                 userRepository.addNewUser(token, "", "", phoneNumber, "", 1, "Higaza").collect{
                                     when(it){
@@ -239,7 +240,7 @@ class MainViewModel @Inject constructor(
                                         }
 
                                         is Resource.Error->{
-
+                                            Log.d("TAG", "checkIfUserDataIsExists: "+it.message)
                                         }
                                     }
                                 }

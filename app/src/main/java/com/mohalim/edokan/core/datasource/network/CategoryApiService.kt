@@ -9,12 +9,7 @@ import retrofit2.http.Query
 
 interface CategoryApiService {
 
-    @GET("/Development/Category/get-main-categories")
-    suspend fun getMainCategories(
-        @Header("Authorization") token: String
-    ): Response<CategoriesResponse>
-
-    @GET("/Development/Category/get-categories-by-name/{search_string}")
+    @GET("/categories/{search_string}")
     suspend fun getCategoriesByName(
         @Header("Authorization") token: String,
         @Path("search_string") searchString: String): Response<CategoriesResponse>

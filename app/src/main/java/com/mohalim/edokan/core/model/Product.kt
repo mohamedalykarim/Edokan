@@ -4,7 +4,7 @@ import com.google.firebase.firestore.Exclude
 import java.math.BigInteger
 
 data class Product(
-    val productId: String = "",
+    val productId: Int = 0,
     val productName: String = "",
     val productDescription: String = "",
     val productImageUrl: String = "",
@@ -23,7 +23,7 @@ data class Product(
     val marketPlaceLat: Double = 0.0,
     val marketPlaceLng: Double = 0.0,
     val productQuantity: Double = 0.0,
-    val productStatus: Boolean = false,
+    val productStatus: Int = 1,
     val dateAdded: Double = 0.0,
     val dateModified: Double = 0.0,
 )

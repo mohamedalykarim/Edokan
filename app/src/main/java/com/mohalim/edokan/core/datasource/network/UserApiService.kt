@@ -12,10 +12,10 @@ import retrofit2.http.POST
 
 interface UserApiService {
 
-    @GET("/Development/User/get-user-by-id")
+    @GET("/users/")
     suspend fun getUserById(@Header("Authorization") token: String): Response<UserResponse>
 
-    @POST("/Development/User/add-new-user")
+    @POST("/users/")
     suspend fun addNewUser(
         @Header("Authorization") token: String,
         @Body addUserRequest: AddUserRequest,

@@ -17,29 +17,24 @@ import retrofit2.http.PartMap
 import retrofit2.http.Path
 
 interface SellerApiService{
-    @GET("/Development/User/get-user-by-id")
-    suspend fun getMarketplaceById(
-        @Header("Authorization") token: String
-    ): Response<UserResponse>
-
     /**
      * Get Marketplaces for specific Seller
      */
-    @GET("/Development/Marketplace/{city_id}/{marketplace_owner_id}")
+    @GET("/marketplaces/{city_id}/{marketplace_owner_id}")
     suspend fun getMarketplacesByUserAndCity(
         @Header("Authorization") token: String,
         @Path("city_id") cityId: Int,
         @Path("marketplace_owner_id") marketplaceOwnerId: String)
     : Response<MarketplacesResponse>
 
-    @POST("/Development/Marketplace/add-marketplace")
+    @POST("/marketplaces/")
     suspend fun addMarketplace(
         @Header("Authorization") token: String,
         @Body data: MarketPlace
     ): Response<AddResponse>
 
     @Multipart
-    @POST("/Development/Product/add-new-product")
+    @POST("/products/")
     suspend fun addProduct(
         @Header("Authorization") token: String,
         @Part("product_name") productName :String,

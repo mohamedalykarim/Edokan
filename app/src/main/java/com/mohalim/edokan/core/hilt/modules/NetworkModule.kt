@@ -20,7 +20,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://wk0arz9t1b.execute-api.eu-north-1.amazonaws.com/")
+            .baseUrl("http://192.168.1.104:3001/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
