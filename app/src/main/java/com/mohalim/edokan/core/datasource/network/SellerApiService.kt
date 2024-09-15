@@ -1,8 +1,10 @@
 package com.mohalim.edokan.core.datasource.network
 
 import com.mohalim.edokan.core.model.MarketPlace
+import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.model.network.AddResponse
 import com.mohalim.edokan.core.model.network.MarketplacesResponse
+import com.mohalim.edokan.core.model.network.ProductResponse
 import com.mohalim.edokan.core.model.network.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -15,6 +17,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.PartMap
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface SellerApiService{
     /**
@@ -32,6 +35,16 @@ interface SellerApiService{
         @Header("Authorization") token: String,
         @Body data: MarketPlace
     ): Response<AddResponse>
+
+
+    @GET("/products/get")
+    suspend fun getProducts(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("marketplace_id") marketplaceId: Int,
+        @Query("search") search: String
+    ): Response<ProductResponse>
 
     @Multipart
     @POST("/products/")

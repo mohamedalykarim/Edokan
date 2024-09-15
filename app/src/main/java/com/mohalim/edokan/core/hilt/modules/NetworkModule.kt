@@ -3,6 +3,7 @@ package com.mohalim.edokan.core.hilt.modules
 import com.mohalim.edokan.core.datasource.network.CategoryApiService
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.datasource.network.UserApiService
+import com.mohalim.edokan.core.utils.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,7 +21,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.104:3001/")
+            .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

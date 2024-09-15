@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -19,16 +17,13 @@ import com.mohalim.edokan.core.datasource.repository.SellerRepository
 import com.mohalim.edokan.core.datasource.repository.UserRepository
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
-import com.mohalim.edokan.core.model.User
 import com.mohalim.edokan.core.utils.AuthUtils
 import com.mohalim.edokan.core.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -44,6 +39,9 @@ class MainViewModel @Inject constructor(
     val userRepository: UserRepository,
     val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
+
+    var LIMIT = 10
+    var page = 1
 
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -77,8 +75,31 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
                 viewModelScope.launch {
-                    sellerRepository.getProducts(it.token.toString(), query, 5L, selectedMarketPlaceId.toString()).collect{
+                    val marketplaceId = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceId() }
 
+                    sellerRepository.getProducts(
+                        it.token.toString(),
+                        query,
+                        LIMIT,
+                        page,
+                        marketplaceId ?: 0
+                    ).collect{
+                        when(it){
+                            is Resource.Loading->{}
+                            is Resource.Success->{
+                                it.data?.let {products->
+                                    _products.value = _products.value.toMutableList().apply {
+                                        addAll(products)
+                                        products.forEach {
+                                            Log.d("TAG", "SellerProductsScreen: "+it.productName)
+                                        }
+                                    }
+                                }
+
+
+                            }
+                            is Resource.Error->{}
+                        }
                     }
 
                 }

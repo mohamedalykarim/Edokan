@@ -1,30 +1,22 @@
 package com.mohalim.edokan.core.datasource.repository
 
-import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mohalim.edokan.R
 import com.mohalim.edokan.core.datasource.network.CategoryApiService
 import com.mohalim.edokan.core.datasource.network.SellerApiService
 import com.mohalim.edokan.core.model.Category
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
-import com.mohalim.edokan.core.model.network.ProductByOwnerRequest
 import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
 class SellerRepository @Inject constructor(
@@ -111,15 +103,36 @@ class SellerRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun getProducts(token: String, searchQuery: String, limit: Long, marketplaceOwnerId: String): Flow<Resource<out List<Product>>> = flow<Resource<out List<Product>>> {
+
+    suspend fun getProducts(
+        token: String,
+        searchQuery: String,
+        limit: Int,
+        page: Int,
+        marketplaceId: Int
+    ): Flow<Resource<out List<Product>>> = flow<Resource<out List<Product>>> {
         emit(Resource.Loading())
         try {
-            val productRequest = ProductByOwnerRequest(searchQuery, limit, marketplaceOwnerId)
-            //sellerApiService.getProducts(token, productRequest)
-        }catch (e : Exception){
+            val response = sellerApiService.getProducts(token, page, limit, marketplaceId, searchQuery)
+
+            if (response.isSuccessful) {
+                val products: MutableList<Product> = ArrayList()
+                response.body()?.result?.forEach {
+                    products.add(it)
+                }
+                emit(Resource.Success(products))
+            }else{
+                Log.d("TAG", "getProducts: "+response.errorBody()?.string())
+                emit(Resource.Error(message = response.errorBody()?.string().toString()))
+            }
+
+        }catch (e: Exception){
+            Log.d("TAG", "getProducts: "+e.message)
             emit(Resource.Error(e.message.toString()))
         }
     }.flowOn(Dispatchers.IO)
+
+
 
 
     fun addProduct(context: Context, token: String, product: Product): Flow<Resource<out Boolean>> = flow {

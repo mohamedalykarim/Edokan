@@ -3,6 +3,8 @@ package com.mohalim.edokan.ui.main
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -43,7 +46,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +79,7 @@ import com.mohalim.edokan.R
 import com.mohalim.edokan.core.model.MarketPlace
 import com.mohalim.edokan.core.model.Product
 import com.mohalim.edokan.core.utils.AuthUtils
+import com.mohalim.edokan.core.utils.Constants
 import com.mohalim.edokan.core.utils.SealedSellerScreen
 import com.mohalim.edokan.ui.seller.SellerAddMarketplaceActivity
 import com.mohalim.edokan.ui.seller.SellerAddProductActivity
@@ -317,6 +323,24 @@ fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
         var searchQuery by remember { mutableStateOf("") }
         val products by viewModel.products.collectAsState()
 
+
+
+        val listState = rememberLazyListState()
+
+        // observe list scrolling
+        val reachedBottom: Boolean by remember {
+            derivedStateOf {
+                val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - 1
+            }
+        }
+
+        // load more if scrolled to bottom
+        LaunchedEffect(reachedBottom) {
+            if (reachedBottom) viewModel.searchProducts(viewModel.searchQuery.value)
+        }
+
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -366,6 +390,7 @@ fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
 
 
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -397,7 +422,7 @@ fun ProductItem(product: Product) {
             Image(
                 painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
-                    .data(product.productImageUrl)
+                    .data(Uri.parse(Constants.BASE_URL + product.productImageUrl))
                     .size(Size.ORIGINAL)
                     .build()
                 ),
