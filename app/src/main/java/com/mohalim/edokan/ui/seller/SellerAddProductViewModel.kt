@@ -270,7 +270,7 @@ class SellerAddProductViewModel @Inject constructor(
                     dateModified = System.currentTimeMillis().toDouble(),
                 )
 
-                sellerRepository.addProduct(context, it.token.toString(), product).collect{
+                sellerRepository.addProduct(context, it.token.toString(), product, chosenCategories).collect{
                     when(it) {
                         is Resource.Loading -> {
                         }

@@ -12,6 +12,7 @@ import com.mohalim.edokan.core.utils.Resource
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -135,7 +136,12 @@ class SellerRepository @Inject constructor(
 
 
 
-    fun addProduct(context: Context, token: String, product: Product): Flow<Resource<out Boolean>> = flow {
+    fun addProduct(
+        context: Context,
+        token: String,
+        product: Product,
+        chosenCategories: MutableStateFlow<ArrayList<Category>>
+    ): Flow<Resource<out Boolean>> = flow {
         emit(Resource.Loading())
         try {
 
@@ -172,6 +178,8 @@ class SellerRepository @Inject constructor(
                 }
             }
 
+            var categories : List<Int> = chosenCategories.value.map { it.categoryId }
+
 
             val response = sellerApiService.addProduct(
                 token,
@@ -191,6 +199,7 @@ class SellerRepository @Inject constructor(
                 product.productOwnerId,
                 product.dateAdded,
                 product.dateModified,
+                categories,
                 fileParts)
             if (response.isSuccessful) {
                 Log.d("TAG", "addProduct: Success")
@@ -198,6 +207,7 @@ class SellerRepository @Inject constructor(
                 emit(Resource.Success(true))
             } else {
                 val errorBody = response.errorBody()?.string()
+                Log.d("TAG", "addProduct: " + errorBody)
                 emit(Resource.Error(errorBody.toString()))
             }
 

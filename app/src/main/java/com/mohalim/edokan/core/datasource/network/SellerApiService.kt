@@ -66,6 +66,7 @@ interface SellerApiService{
         @Part("product_owner_id") productOwnerId : String,
         @Part("date_added") dateAdded : Double,
         @Part("date_modified") dateModified : Double,
+        @Part("categories") categories : List<Int>,
         @Part files: List<MultipartBody.Part>
     ): Response<AddResponse>
 
