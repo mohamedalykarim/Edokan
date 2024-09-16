@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        observeRole()
+
+
         setContent {
             val role by viewModel.role.collectAsState(initial = "")
             val showLoading by viewModel.showLoading.collectAsState(initial = true)
@@ -84,7 +87,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        observeRole()
 
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.checkIfUserDataIsExists(firebaseAuth)

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color.parseColor
 import android.net.Uri
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,6 +85,7 @@ import com.mohalim.edokan.core.utils.SealedSellerScreen
 import com.mohalim.edokan.ui.seller.SellerAddMarketplaceActivity
 import com.mohalim.edokan.ui.seller.SellerAddProductActivity
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun SellerMainUI(context: Context, viewModel: MainViewModel) {
@@ -322,10 +324,18 @@ fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
     { innerPadding ->
         var searchQuery by remember { mutableStateOf("") }
         val products by viewModel.products.collectAsState()
-
-
-
         val listState = rememberLazyListState()
+
+        val countDownTimer = object : CountDownTimer(2000,100) {
+            override fun onTick(millisUntilFinished: Long) {}
+
+            override fun onFinish() {
+                viewModel.page = 1
+                viewModel.setProducts(ArrayList())
+                viewModel.searchProducts(searchQuery)
+            }
+
+        }
 
         // observe list scrolling
         val reachedBottom: Boolean by remember {
@@ -337,7 +347,9 @@ fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
 
         // load more if scrolled to bottom
         LaunchedEffect(reachedBottom) {
-            if (reachedBottom) viewModel.searchProducts(viewModel.searchQuery.value)
+            if (reachedBottom) {
+                viewModel.searchProducts(viewModel.searchQuery.value)
+            }
         }
 
 
@@ -351,7 +363,13 @@ fun SellerProductsScreen(context: Context, viewModel: MainViewModel) {
                 value = searchQuery,
                 onValueChange = {
                     searchQuery = it
-                    viewModel.searchProducts(it)
+                    countDownTimer.start()
+                    if(it == "" || (Calendar.getInstance().timeInMillis - viewModel.savedTime) < 1000){
+                        countDownTimer.cancel()
+                    }
+
+                    viewModel.savedTime = Calendar.getInstance().timeInMillis
+
                 },
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 15.dp)
@@ -552,7 +570,8 @@ fun BottomNavigationBar(navController: NavController, viewModel: MainViewModel) 
                             }
 
                             if(screen.route == SealedSellerScreen.Products.route){
-                                viewModel.searchProducts(viewModel.searchQuery.value)                           }
+                                viewModel.searchProducts(viewModel.searchQuery.value)
+                            }
                         }
                     }
                 },

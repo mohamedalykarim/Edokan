@@ -40,10 +40,10 @@ class MainViewModel @Inject constructor(
     val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
+    var savedTime = 0L
+
     var LIMIT = 10
     var page = 1
-
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     private val _showLoading = MutableStateFlow(true)
     val showLoading : StateFlow<Boolean> = _showLoading
@@ -71,47 +71,8 @@ class MainViewModel @Inject constructor(
         fetchProducts(query)
     }
 
-    private fun fetchProducts(query: String) {
-        viewModelScope.launch {
-            firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
-                viewModelScope.launch {
-                    val marketplaceId = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceId() }
-
-                    sellerRepository.getProducts(
-                        it.token.toString(),
-                        query,
-                        LIMIT,
-                        page,
-                        marketplaceId ?: 0
-                    ).collect{
-                        when(it){
-                            is Resource.Loading->{}
-                            is Resource.Success->{
-                                it.data?.let {products->
-                                    _products.value = _products.value.toMutableList().apply {
-                                        addAll(products)
-                                        products.forEach {
-                                            Log.d("TAG", "SellerProductsScreen: "+it.productName)
-                                        }
-                                    }
-                                }
-
-
-                            }
-                            is Resource.Error->{}
-                        }
-                    }
-
-                }
-
-            }
-        }
-    }
-
-
     private lateinit var verificationId: String
     private lateinit var resendingToken: PhoneAuthProvider.ForceResendingToken
-
 
     val username: Flow<String?> = userPreferencesRepository.usernameFlow
     val phoneNumber: Flow<String?> = userPreferencesRepository.phoneNumberFlow
@@ -137,25 +98,6 @@ class MainViewModel @Inject constructor(
 
     fun setShowLoading(value: Boolean) {
         _showLoading.value = value
-    }
-
-    fun sendVerificationCode(context: Context, phoneNumber: String) {
-        var phone = phoneNumber
-        if (phone.startsWith("0")) {
-            phone.drop(1)
-        }
-
-        phone = "+20"+phone
-
-        val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber(phone)
-            .setTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
-            .setCallbacks(callbacks)
-            .setActivity(context as AppCompatActivity)
-            .build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
-        _uiState.value = VerificationState.LoadingInitial
-
     }
 
     private val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -194,6 +136,26 @@ class MainViewModel @Inject constructor(
                 Log.d("TAG", "signInWithPhoneAuthCredential: "+e.message)
             }
         }
+    }
+
+
+    fun sendVerificationCode(context: Context, phoneNumber: String) {
+        var phone = phoneNumber
+        if (phone.startsWith("0")) {
+            phone.drop(1)
+        }
+
+        phone = "+20"+phone
+
+        val options = PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber(phone)
+            .setTimeout(60L, java.util.concurrent.TimeUnit.SECONDS)
+            .setCallbacks(callbacks)
+            .setActivity(context as AppCompatActivity)
+            .build()
+        PhoneAuthProvider.verifyPhoneNumber(options)
+        _uiState.value = VerificationState.LoadingInitial
+
     }
 
     fun checkIfUserDataIsExists(firebaseAuth: FirebaseAuth) {
@@ -272,64 +234,7 @@ class MainViewModel @Inject constructor(
             }
 
         }
-
-
-
-
-        val user = firebaseAuth.currentUser ?: return
-
-        db.collection("Users").document(user.phoneNumber.toString()).get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                viewModelScope.launch {
-
-                }
-
-            } else {
-                val cityId = 1;
-                val cityName = "Higaza"
-
-                val newUser = hashMapOf(
-                    "uid" to user.uid,
-                    "email" to user.email,
-                    "phoneNumber" to user.phoneNumber,
-                    "role" to "CUSTOMER",
-                    "username" to user.displayName,
-                    "imageUrl" to user.photoUrl.toString(),
-                    "points" to 0,
-                    "cityId" to cityId,
-                    "cityName" to cityName
-                )
-                db.collection("Users").document(user.phoneNumber.toString()).set(newUser)
-                    .addOnSuccessListener {
-
-                        viewModelScope.launch {
-                            withContext(Dispatchers.IO){
-                                userPreferencesRepository.saveUserDetails(
-                                    user.uid,
-                                    user.displayName ?: "",
-                                    user.phoneNumber ?: "",
-                                    user.photoUrl.toString(),
-                                    "CUSTOMER",
-                                    cityId = cityId,
-                                    "Higaza"
-                                )
-
-                                fetchApprovedMarketPlaces(cityId)
-
-                            }
-                        }
-
-                    }
-                    .addOnFailureListener { e ->
-                        Log.d("TAG", ""+ e.message)
-                    }
-
-            }
-        }.addOnFailureListener {
-
-        }
     }
-
 
     fun fetchApprovedMarketPlaces(cityId: Int){
         val uid = firebaseAuth.currentUser!!.uid
@@ -345,6 +250,47 @@ class MainViewModel @Inject constructor(
 
 
     }
+
+    private fun fetchProducts(query: String) {
+        viewModelScope.launch {
+            firebaseAuth.currentUser!!.getIdToken(true).addOnSuccessListener {
+                viewModelScope.launch {
+                    val marketplaceId = withContext(Dispatchers.IO) { userSelectionPreferencesRepository.getSelectedMarketplaceId() }
+
+                    sellerRepository.getProducts(
+                        it.token.toString(),
+                        query,
+                        LIMIT,
+                        page,
+                        marketplaceId ?: 0
+                    ).collect{
+                        when(it){
+                            is Resource.Loading->{}
+                            is Resource.Success->{
+                                it.data?.let {products->
+                                    if (page == 1 && products.isEmpty()){
+                                        _products.value = ArrayList()
+                                    }else{
+                                        _products.value = _products.value.toMutableList().apply {
+                                            addAll(products)
+                                        }
+                                        page++
+                                    }
+
+                                }
+
+
+                            }
+                            is Resource.Error->{}
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
+
 
 
 
